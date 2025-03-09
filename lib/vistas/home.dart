@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -10,14 +12,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
+  // Lo que muestra la vista
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
           widget.title,
           style: TextStyle(
             color: Colors.white,
-            letterSpacing: 2.toDouble()
+            letterSpacing: 1.toDouble()
           ),
         ),
           centerTitle: true,

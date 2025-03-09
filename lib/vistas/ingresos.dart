@@ -14,8 +14,15 @@ class _IngresosState extends State<Ingresos>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        backgroundColor: const Color(0xFF02013C),
+        centerTitle: true,
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            color: Colors.white,
+            letterSpacing: 1.toDouble(),
+          ),
+        ),
       ),
       body: Center(
         child: Column(
