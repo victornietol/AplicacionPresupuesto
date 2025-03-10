@@ -13,12 +13,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _balanceGeneral = "0.0";
+  String _balanceGeneral = "+0.0";
+  final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
+  double _lineaAncho = 0.0;
+
 
   @override
   void initState() {
     super.initState();
     obtenerBalance(); // Actualizar balace
+
+    // esperar a que se renderice el widget para obtener su tamanio
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _obtenerTamanioTexto();
+    });
 
     // Pruebas
     //_datos = DataBaseOperaciones().obtenerUsuarios();
@@ -60,52 +68,94 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
-            letterSpacing: 1.toDouble()
+            letterSpacing: 1.0
           ),
         ),
           centerTitle: true,
           backgroundColor: const Color(0xFF02013C)
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+      body: Column(
+        children: <Widget>[
 
-            Container(
-              padding: EdgeInsets.only(bottom: 5.0),
-              child: Text(
-                _balanceGeneral,
-                style: TextStyle(
-                  color: _balanceGeneral.startsWith('+') ? Colors.green : Colors.red,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+          // Parte superior (Se muestra el balance general)
+          Container(
+            width: double.infinity, // Se ajusta a toda la pantalla
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container( // Texto balance general
+                  padding: EdgeInsets.only(bottom: 5.0),
+                  child: Text(
+                    '\$ $_balanceGeneral',
+                    key: _tamanioTextoBalance,
+                    style: TextStyle(
+                      color: _balanceGeneral.startsWith('+') ? Colors.green : Colors.red,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+
+                Container( // linea debajo del balance general
+                  height: 1.0,
+                  width: _lineaAncho+30.0, // Asignar el tamanio de la linea dinamicamente
+                  color: Colors.black,
+                ),
+
+                const SizedBox(height: 10.0), // espacio
+
+                const Text(
+                  "Balance general",
+                  style: TextStyle(
+                    color: Colors.black,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+
+              ],
             ),
-
-            Container( // linea debajo del balance general
-              height: 1.0,
-
-              color: Colors.black,
-            ),
-
-            const SizedBox(height: 10.0), // espacio
-
-            const Text(
-              "Balance general",
-              style: TextStyle(
-                color: Colors.black,
-                letterSpacing: 2.0,
-              ),
-            )
+          ),
 
 
-          ],
-        ),
+          // Parte inferior de la pantalla (mostrar algunos detalles de ingresos y egresos)
+          Expanded(
+              child: Container(
+                padding: EdgeInsets.all(16),
+                width: double.infinity,
+                color: Colors.green,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "Seccion inferior para detalles"
+                    ),
+
+                  ],
+                ),
+              )
+          ),
+
+        ],
       ),
-       // This trailing comma makes auto-formatting nicer for build methods.
+
     );
   }
+
+
+
+  // Funcion para obtener el valor del ancho del widget Text despues de renderizarse
+  void _obtenerTamanioTexto() {
+    final RenderBox? renderBox = _tamanioTextoBalance.currentContext?.findRenderObject() as RenderBox?;
+    if(renderBox != null) {
+      final tamanio = renderBox.size;
+      setState(() {
+        _lineaAncho = tamanio.width;
+      });
+    }
+  }
+
 }
