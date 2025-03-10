@@ -24,7 +24,7 @@ class _NavegadorState extends State<Navegador>{
       const Ingresos(title: "Ingresos")
     );
     _vistas.add(
-        const MyHomePage(title: "Resumen Presupuesto")
+        const MyHomePage(title: "Resumen Presupuesto", usuario: 'generico')
     );
     _vistas.add(
       const Egresos(title: "Egresos")

@@ -35,12 +35,12 @@ class DataBaseOperaciones {
         await db.execute('PRAGMA foreign_keys = ON;');
 
         // Valores iniciales
-        List<Map<String, dynamic>> ingresos = [
+        List<Map<String, dynamic>> categorias_ingresos = [
           {'nombre': 'ingreso fijo'},
           {'nombre': 'ingreso variable'}
         ];
 
-        List<Map<String, dynamic>> egresos = [
+        List<Map<String, dynamic>> categorias_egresos = [
           {'nombre': 'vivienda'},
           {'nombre': 'alimentacion'},
           {'nombre': 'transporte'},
@@ -96,7 +96,7 @@ class DataBaseOperaciones {
               fk_id_usuario INTEGER,
               fk_id_categoria_ingreso INTEGER,
               FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
-              FOREIGN KEY (fk_id_categoria) REFERENCES categoria_ingreso(id_categoria) ON DELETE CASCADE
+              FOREIGN KEY (fk_id_categoria_ingreso) REFERENCES categoria_ingreso(id_categoria) ON DELETE CASCADE
             )
           ''');
 
@@ -111,7 +111,7 @@ class DataBaseOperaciones {
               fk_id_usuario INTEGER,
               fk_id_categoria_egreso INTEGER,
               FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
-              FOREIGN KEY (fk_id_categoria) REFERENCES categoria_egreso(id_categoria) ON DELETE CASCADE
+              FOREIGN KEY (fk_id_categoria_egreso) REFERENCES categoria_egreso(id_categoria) ON DELETE CASCADE
             )
           ''');
 
@@ -124,13 +124,13 @@ class DataBaseOperaciones {
           );
 
           // Insertar categorias ingresos
-          for(var ingreso in ingresos) {
-            await txn.insert('ingreso', ingreso);
+          for(var ingreso in categorias_ingresos) {
+            await txn.insert('categoria_ingreso', ingreso);
           }
 
           // Insertar categorias egresos
-          for(var egreso in egresos) {
-            await txn.insert('egreso', egreso);
+          for(var egreso in categorias_egresos) {
+            await txn.insert('categoria_egreso', egreso);
           }
         });
       }
