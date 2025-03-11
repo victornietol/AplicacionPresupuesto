@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       locale: const Locale('es', 'MX'),
-      home: const Navegador(inicio: 1),
+      home: const Navegador(inicio: 1, usuario: 'generico'),
     );
   }
 }

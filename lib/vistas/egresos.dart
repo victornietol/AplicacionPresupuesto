@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Egresos extends StatefulWidget{
-  const Egresos({super.key, required this.title});
+  const Egresos({super.key, required this.title, required this.usuario});
   final String title;
+  final String usuario;
 
   @override
   State<Egresos> createState() => _EgresosState();

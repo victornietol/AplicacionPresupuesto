@@ -227,6 +227,18 @@ class DataBaseOperaciones {
     }
   }
 
+  // Obtener el listado de categorias
+  Future<List<Map<String, dynamic>>> obtenerCategorias(String tipo) async {
+    final db = await database;
+    if(tipo=='ingreso') {
+      return db.query('categoria_ingreso');
+    } else if(tipo=='egreso') {
+      return db.query('categoria_egreso');
+    } else {
+      return []; // Categoria incorrecta
+    }
+  }
+
   // Obtener lista ingresos del usuario
   Future<List<Map<String, dynamic>>> obtenerIngresosTodos(String usuario) async {
     final db = await database;

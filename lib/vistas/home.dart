@@ -13,7 +13,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _balanceGeneral = "+0.0";
+  String _balanceGeneral = "+0";
   final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
   double _lineaAncho = 0.0;
 

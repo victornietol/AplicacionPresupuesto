@@ -4,8 +4,9 @@ import 'package:calculadora_presupuesto/vistas/egresos.dart';
 import 'package:calculadora_presupuesto/vistas/ingresos.dart';
 
 class Navegador extends StatefulWidget{
-  const Navegador({super.key, required this.inicio});
+  const Navegador({super.key, required this.inicio, required this.usuario});
   final int inicio;
+  final String usuario;
 
   @override
   State<Navegador> createState() => _NavegadorState();
@@ -21,13 +22,13 @@ class _NavegadorState extends State<Navegador>{
     super.initState();
     _indice = widget.inicio;
     _vistas.add(
-      const Ingresos(title: "Ingresos")
+      Ingresos(title: "Ingresos", usuario: widget.usuario)
     );
     _vistas.add(
-        const MyHomePage(title: "Resumen Presupuesto", usuario: 'generico')
+        MyHomePage(title: "Resumen Presupuesto", usuario: widget.usuario)
     );
     _vistas.add(
-      const Egresos(title: "Egresos")
+      Egresos(title: "Egresos", usuario: widget.usuario)
     );
   }
 
