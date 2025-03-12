@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:decimal/decimal.dart';
+import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 
 class Ingresos extends StatefulWidget{
   const Ingresos({super.key, required this.title, required this.usuario});
@@ -14,14 +15,17 @@ class Ingresos extends StatefulWidget{
 class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin { // Para el rendimiento del tabCntroller
   late TabController _tabController; //  Sincronizar las pestañas
 
-  late List<Map<String, dynamic>> _ingresosTodos;
-  String _totalIngresos = '+0';
+  late List<Map<String, dynamic>> _categorias;
+  late List<Map<String, dynamic>> _ingresosTodos; // Datos de mi ingresos
+  String _totalIngresosText = '+0';
+  Decimal _totalIngresos = Decimal.fromInt(0);
 
   final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
   double _lineaAncho = 0.0;
 
   bool _cargandoCategorias = true; // Controlar la carga de los datos
   bool _cargandoTotal = true;
+  bool _cargandoIngresosTodos = true;
 
 
 
@@ -32,7 +36,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     // Obtener mi lista de categorias de ingresos para el tabController
     DataBaseOperaciones().obtenerCategorias("ingreso").then((listaCat) {
       setState(() {
-        _ingresosTodos = listaCat;
+        _categorias = listaCat;
         _tabController = TabController(length: listaCat.length+1, vsync: this);
         _cargandoCategorias = false; // datos cargados
       });
@@ -41,8 +45,17 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     // Obtener la suma de los ingresos del usuario
     DataBaseOperaciones().sumarIngresosTodos(widget.usuario).then((value) {
       setState(() {
-        _totalIngresos = '+${value.toString()}';
+        _totalIngresosText = '+${value.toString()}';
+        _totalIngresos = value;
         _cargandoTotal = false;
+      });
+    });
+
+    // Obtener todos los datos de ingresos
+    DataBaseOperaciones().obtenerIngresosTodos(widget.usuario).then((value) {
+      setState(() {
+        _ingresosTodos = value;
+        _cargandoIngresosTodos = false;
       });
     });
 
@@ -50,6 +63,17 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _obtenerTamanioTexto();
     });
+
+    // datos de ejemplo ingresos y egresos
+    //DataBaseOperaciones().insertarIngreso({
+    //  'nombre': 'ingrso1',
+    //  'monto': 1000,
+    //  'descripcion': 'DEscp1',
+    //  'fecha_registro': DateTime.now().toIso8601String(),
+    //  'fk_id_usuario':1,
+    //  'fk_id_categoria_ingreso':1
+    //});
+
 
   }
 
@@ -65,7 +89,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     // Se muestra pantalla de carga mientras cargan datos
-    if(_cargandoCategorias && _cargandoTotal) {
+    if(_cargandoCategorias || _cargandoTotal || _cargandoIngresosTodos) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF02013C),
@@ -110,7 +134,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                 Container( // Texto balance general
                   padding: EdgeInsets.only(bottom: 5.0),
                   child: Text(
-                    '\$ $_totalIngresos',
+                    '\$ $_totalIngresosText',
                     key: _tamanioTextoBalance,
                     style: const TextStyle(
                       color: Colors.green,
@@ -144,7 +168,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
               unselectedLabelColor: Colors.grey,
               tabs: [ // Con cada elemento de mi lista generar una pestania
                 const Tab(text: 'Todos'),
-                ..._ingresosTodos.map(
+                ..._categorias.map(
                         (categoria) => Tab(
                             text: categoria['nombre'][0].toUpperCase()+categoria['nombre'].substring(1),
                         ),
@@ -158,9 +182,15 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildScrollableList("Publicaciones"),
-                  _buildScrollableList("Respuestas"),
-                  _buildScrollableList("Destacados"),
+                  //_buildScrollableList("Publicaciones"),
+                  //_buildScrollableList("Respuestas"),
+                  //_buildScrollableList("Destacados"),
+                  BotonIngresoEgreso(
+                      tipo: 'ingreso',
+                      listaElementos: _ingresosTodos,
+                      totalIngresos: _totalIngresos),
+                  Text("Hola2"),
+                  Text("Hola3"),
                 ],
               )
           )
