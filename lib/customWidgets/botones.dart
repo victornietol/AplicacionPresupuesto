@@ -33,20 +33,56 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
   void _crearWidgetsTodos() {
       // Recorrer todos los elementos de la BD
       for (var elemento in widget.listaElementos) {
+        Decimal monto = Decimal.parse(elemento['monto'].toString());
+        Decimal porcentaje = ((monto*Decimal.fromInt(100)) / (widget.totalIngresos)).toDecimal();
+        
         // Widget que se mostrara
         botones.add(
             Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(elemento["nombre"]),
-                  Text(elemento["monto"].toString())
-                ],
-              ),
-            )
+              margin: EdgeInsets.zero,
+              child: MaterialButton(
+                onPressed: () => {print("boton presionado")},
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column( // parte izquieda
+                          crossAxisAlignment: CrossAxisAlignment.start, // ------
+                          children: [
+                            Text(elemento["nombre"]),
+                            Text(elemento["descripcion"]),
+                          ],
+                        ),
+                        Column( // parte izquieda
+                          crossAxisAlignment: CrossAxisAlignment.end, // ----------
+                          children: [
+                            Text(monto.toStringAsFixed(2)),
+                            Text('%${porcentaje.toStringAsFixed(2)}'),
+                          ],
+                        ),
+                      ],
+                    ),
+
+
+
+                    const SizedBox(
+                      height: 6.0,
+                    ),
+                    Container( // linea de separacion
+                      height: 1.0,
+                      color: const Color(0xFFe6e6e6),
+                    )
+                  ],
+                ),
+              )
+            ),
         );
       }
+    setState(() {});
   }
+
 
 
 
