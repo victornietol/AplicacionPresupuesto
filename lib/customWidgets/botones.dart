@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
+import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 
 // Boton con previsualizacion del monto del ingreso o egreso
 class BotonIngresoEgreso extends StatefulWidget {
@@ -61,7 +62,22 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
               margin: EdgeInsets.zero,
               padding: EdgeInsets.symmetric(vertical: 4.0),
               child: MaterialButton(
-                onPressed: () => {print("boton presionado")},
+                onPressed: () => {
+                  // Construir nueva ventana para detalles
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CuadroDialogoDetalles(
+                            tipo: widget.tipo,
+                            listaCategorias: widget.listaCategorias,
+                            elemento: elemento,
+                            categoriaElemento: categoria,
+                            montoFormateado: montoFormateado,
+                            porcentaje: porcentaje
+                        );
+                      }
+                  )
+                },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -80,7 +96,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                             ),
                             Text( // Categoria
                               categoria[0].toUpperCase()+categoria.substring(1),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.normal,
                                 color: Colors.grey,
                               ),

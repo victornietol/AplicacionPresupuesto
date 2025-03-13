@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:calculadora_presupuesto/navegador.dart';
+import 'package:intl/intl.dart';
 
 // Cuadro de de dialogo para agregar un ingreso o egreso
 class CuadroDialogoAgregar extends StatefulWidget {
@@ -170,9 +171,10 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
             Container(
               child: Text(
                   widget.tipo=='ingreso' ? 'Nuevo ingreso' : 'Nuevo egreso',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 30.0,
                 ),
+                softWrap: true,
               ),
             ),
             const SizedBox(height: 20,),
@@ -182,7 +184,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                 controller: _nombreTEC,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso'
+                  labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
                 ),
               ),
             ),
@@ -266,7 +268,12 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                         Navigator.pop(context);
                       },
                     color: Colors.grey,
-                    child: const Text('Cancelar'),
+                    child: const Text(
+                        'Cancelar',
+                      style: TextStyle(
+                        color: Colors.black
+                      ),
+                    ),
                   ),
                   MaterialButton(
                     onPressed: () {
@@ -299,3 +306,257 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
     );
   }
 }
+
+
+
+
+// Cuadro de de dialogo para mostrar detalles un ingreso o egreso
+class CuadroDialogoDetalles extends StatefulWidget {
+  const CuadroDialogoDetalles({super.key,
+    required this.tipo,
+    required this.listaCategorias,
+    required this.elemento,
+    required this.categoriaElemento,
+    required this.montoFormateado,
+    required this.porcentaje
+  });
+  final String tipo;
+  final List<Map<String, dynamic>> listaCategorias;
+  final Map<String, dynamic> elemento;
+  final String categoriaElemento;
+  final String montoFormateado;
+  final double porcentaje;
+
+
+  @override
+  State<CuadroDialogoDetalles> createState() => _CuadroDialogoDetallesState();
+}
+
+class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: Container(
+        width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          //crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Column(
+              // Titulo de la ventana
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  widget.tipo=='ingreso' ? 'Detalles del ingreso' : 'Detalles del egreso',
+                  style: const TextStyle(
+                    fontSize: 30.0,
+                  ),
+                  softWrap: true,
+                ),
+              ],
+            ),
+
+            Column( // Contenido de la ventana
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 20,),
+                Container( // Nombre del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(6.0),
+                      topRight: Radius.circular(6.0),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                          'Nombre:'
+                      ),
+                      Text(
+                          widget.elemento['nombre'][0].toUpperCase()+widget.elemento['nombre'].substring(1),
+                        softWrap: true,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2,),
+                Container( // Monto del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                          'Monto:'
+                      ),
+                      Text(
+                          widget.montoFormateado,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2,),
+                Container( // Porcentaje del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                          widget.tipo=='ingreso' ? 'Porcentaje correspodiente al total del ingreso:' : 'Porcentaje correspodiente al total del egreso',
+                      softWrap: true,
+                      ),
+                      Text(
+                          '${widget.porcentaje.toStringAsFixed(2)}%',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2,),
+                Container( // Descripcion del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                          'Descripcion:'
+                      ),
+                      Text(
+                          widget.elemento['descripcion'][0].toUpperCase()+widget.elemento['descripcion'].substring(1),
+                        softWrap: true,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2,),
+                Container( // Categoria del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(6.0),
+                      bottomRight: Radius.circular(6.0),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                          'Categoria:'
+                      ),
+                      Text(
+                          widget.categoriaElemento[0].toUpperCase()+widget.categoriaElemento.substring(1),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20,),
+              ],
+            ),
+
+            Column( // Botones
+              children: <Widget>[
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        MaterialButton(
+                          onPressed: () {
+                            print("Eliminar");
+                          },
+                          color: Colors.red,
+                          child: const Text(
+                            'Eliminar',
+                            style: TextStyle(
+                                color: Colors.white
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12,),
+                        MaterialButton(
+                          onPressed: () {
+                            print("Editar");
+                          },
+                          color: const Color(0xFF02013C),
+                          child: const Text(
+                            'Editar',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        MaterialButton(
+                          onPressed: () {
+                            print("Regresar");
+                          },
+                          color: Colors.grey,
+                          child: const Text(
+                            'Regresar',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  ],
+                )
+              ],
+            )
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+
