@@ -3,6 +3,7 @@ import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:decimal/decimal.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:intl/intl.dart';
+import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 
 class Ingresos extends StatefulWidget{
   const Ingresos({super.key, required this.title, required this.usuario});
@@ -198,10 +199,10 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                   //_buildScrollableList("Respuestas"),
                   //_buildScrollableList("Destacados"),
                   BotonIngresoEgreso(
-                      tipo: 'ingreso',
-                      listaElementos: _ingresosTodos,
-                      totalIngresos: _totalIngresos,
-                      listaCategorias: _categorias,
+                    tipo: 'ingreso',
+                    listaElementos: _ingresosTodos,
+                    totalIngresos: _totalIngresos,
+                    listaCategorias: _categorias,
                   ),
                   Text("Hola2"),
                   Text("Hola3"),
@@ -212,7 +213,16 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
           Container(
             child: MaterialButton(
                 onPressed: () {
-                  print("Nuevo ingreso");
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CuadroDialogoAgregar(
+                          tipo: 'ingreso',
+                          listaCategorias: _categorias,
+                          usuario: widget.usuario,
+                        );
+                      }
+                  );
                 },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,

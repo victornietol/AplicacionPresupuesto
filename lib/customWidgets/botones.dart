@@ -51,8 +51,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
     botones.clear(); // Evitar duplicados
       // Recorrer todos los elementos de la BD
       for (var elemento in widget.listaElementos) {
-        Decimal monto = Decimal.parse(elemento['monto'].toString());
-        Decimal porcentaje = ((monto*Decimal.fromInt(100)) / (widget.totalIngresos)).toDecimal();
+        double porcentaje = (elemento['monto']*100.0) / widget.totalIngresos.toDouble(); // Se utiliza double en lugar de decimal para el porcentaje por temas de precision en el punto decimal que no puede manejar Decimal
         String categoria = obtenerCategoria(elemento['fk_id_categoria_ingreso']);
         String montoFormateado = formatearCantidad(elemento['monto']);
 

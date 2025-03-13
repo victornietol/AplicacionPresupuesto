@@ -153,7 +153,7 @@ class DataBaseOperaciones {
   }
 
   // Obtener un usuario por el nombre
-  Future<Map<String, dynamic>?> obtenerUsuario(String nombre) async {
+  Future<Map<String, dynamic>> obtenerUsuario(String nombre) async {
     final db = await database;
     final List<Map<String, dynamic>> res_consulta = await db.query(
       'usuario', // tabla
@@ -161,7 +161,7 @@ class DataBaseOperaciones {
       whereArgs: [nombre] // valor de la condicional '?'
     );
 
-    return res_consulta.isNotEmpty ? res_consulta.first : null; // se utiliza .first para obtener el primer y unico elemento
+    return res_consulta.isNotEmpty ? res_consulta.first : {}; // se utiliza .first para obtener el primer y unico elemento
   }
 
   // Obtener usuarios
