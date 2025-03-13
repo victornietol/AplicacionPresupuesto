@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:decimal/decimal.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
+import 'package:intl/intl.dart';
 
 class Ingresos extends StatefulWidget{
   const Ingresos({super.key, required this.title, required this.usuario});
@@ -77,7 +78,12 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
   }
 
-
+  // Formatear cantidad de dinero
+  String formatearCantidad(num monto) {
+    //final formato = NumberFormat("#,##0.00", "es_MX");
+    final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
+    return formatoDinero.format(monto);
+  }
 
 
 
@@ -106,7 +112,12 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
       );
     }
 
-    _obtenerTamanioTexto();
+    // Si cambio el tamaño del texto del balance
+    if(_lineaAncho==0.0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _obtenerTamanioTexto();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -134,18 +145,19 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                 Container( // Texto balance general
                   padding: EdgeInsets.only(bottom: 5.0),
                   child: Text(
-                    '\$ $_totalIngresosText',
+                    //'\$ $_totalIngresosText',
+                    formatearCantidad(_totalIngresos.toDouble()),
                     key: _tamanioTextoBalance,
                     style: const TextStyle(
                       color: Colors.green,
-                      fontSize: 30,
+                      fontSize: 40,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Container( // linea debajo del balance general
                   height: 1.0,
-                  width: _lineaAncho+30.0, // Asignar el tamanio de la linea dinamicamente
+                  width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
                   color: Colors.black,
                 ),
                 const SizedBox(height: 10.0), // espacio
@@ -188,17 +200,37 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                   BotonIngresoEgreso(
                       tipo: 'ingreso',
                       listaElementos: _ingresosTodos,
-                      totalIngresos: _totalIngresos),
+                      totalIngresos: _totalIngresos,
+                      listaCategorias: _categorias,
+                  ),
                   Text("Hola2"),
                   Text("Hola3"),
                 ],
               )
-          )
+          ),
+
+          Container(
+            child: MaterialButton(
+                onPressed: () {
+                  print("Nuevo ingreso");
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_rounded),
+                    Text(
+                        "Agregar ingreso"
+                    ),
+                  ],
+                )
+            ),
+          ),
 
 
         ],
-      )
-      // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+
+
     );
   }
 

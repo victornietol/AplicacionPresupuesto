@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
+import 'package:intl/intl.dart';
 
 // Boton con previsualizacion del monto del ingreso o egreso
 class BotonIngresoEgreso extends StatefulWidget {
@@ -7,12 +8,12 @@ class BotonIngresoEgreso extends StatefulWidget {
     required this.tipo,
     required this.listaElementos,
     required this.totalIngresos,
-    //required this.listaCategorias
+    required this.listaCategorias
   });
   final String tipo; // Indica si es Ingreso o Egreso
   final List<Map<String, dynamic>> listaElementos; // Datos completos de ingresos o egresos
   final Decimal totalIngresos;
-  //final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
+  final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
 
 
   @override
@@ -28,18 +29,38 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
     super.initState();
     _crearWidgetsTodos();
   }
+
+  // Obtener nombre de la categoria segun su id
+  String obtenerCategoria(int fk_id) {
+    return widget.listaCategorias.firstWhere(
+      (element) => element['id_categoria']==fk_id,
+      orElse: () => {'nombre': 'Sin categoria'},
+    )['nombre'];
+  }
+
+  // Formatear cantidad de dinero
+  String formatearCantidad(num monto) {
+    //final formato = NumberFormat("#,##0.00", "es_MX");
+    final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
+    return formatoDinero.format(monto);
+  }
   
   // Pestaña todos
   void _crearWidgetsTodos() {
+    double tamanioTextPrincipal = 20.0;
+    botones.clear(); // Evitar duplicados
       // Recorrer todos los elementos de la BD
       for (var elemento in widget.listaElementos) {
         Decimal monto = Decimal.parse(elemento['monto'].toString());
         Decimal porcentaje = ((monto*Decimal.fromInt(100)) / (widget.totalIngresos)).toDecimal();
-        
+        String categoria = obtenerCategoria(elemento['fk_id_categoria_ingreso']);
+        String montoFormateado = formatearCantidad(elemento['monto']);
+
         // Widget que se mostrara
         botones.add(
             Container(
               margin: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(vertical: 4.0),
               child: MaterialButton(
                 onPressed: () => {print("boton presionado")},
                 child: Column(
@@ -51,15 +72,42 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                         Column( // parte izquieda
                           crossAxisAlignment: CrossAxisAlignment.start, // ------
                           children: [
-                            Text(elemento["nombre"]),
-                            Text(elemento["descripcion"]),
+                            Text( // Nombre de elemento
+                                elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: tamanioTextPrincipal,
+                              ),
+                            ),
+                            Text( // Categoria
+                              categoria[0].toUpperCase()+categoria.substring(1),
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
-                        Column( // parte izquieda
+                        Column( // parte derecha
                           crossAxisAlignment: CrossAxisAlignment.end, // ----------
                           children: [
-                            Text(monto.toStringAsFixed(2)),
-                            Text('%${porcentaje.toStringAsFixed(2)}'),
+                            Text(
+                                montoFormateado,
+                              style: TextStyle(
+                                fontSize: tamanioTextPrincipal,
+                              ),
+                            ),
+                            Container(
+                              color: Color(0xFFd4fed7),
+                              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                              child: Text(
+                                '${porcentaje.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:decimal/decimal.dart';
+import 'package:intl/intl.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title, required this.usuario});
@@ -16,6 +17,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String _balanceGeneral = "+0";
   final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
   double _lineaAncho = 0.0;
+
+  bool _cargandoBalance = true;
 
 
   @override
@@ -54,9 +57,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if(mounted) { // verificar que se siga mostrando la vista actual
       setState(() {
-        _balanceGeneral = balance>=Decimal.parse('0.0') ? '+${balance.toString()}' : balance.toString();
+        _balanceGeneral = balance>=Decimal.parse('0.0') ?
+          '+ ${formatearCantidad(balance.toDouble())}' :
+          formatearCantidad(balance.toDouble());
+        _cargandoBalance = false;
       });
     }
+  }
+
+  // Formatear cantidad de dinero
+  String formatearCantidad(num monto) {
+    //final formato = NumberFormat("#,##0.00", "es_MX");
+    final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
+    return formatoDinero.format(monto);
   }
 
 
@@ -64,6 +77,30 @@ class _MyHomePageState extends State<MyHomePage> {
   // Lo que muestra la vista
   @override
   Widget build(BuildContext context) {
+    if(_cargandoBalance) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF02013C),
+          centerTitle: true,
+          title: Text(
+            widget.title,
+            style: TextStyle(
+              color: Colors.white,
+              letterSpacing: 1.toDouble(),
+            ),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Si cambio el tamaño del texto del balance
+    if(_lineaAncho==0.0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _obtenerTamanioTexto();
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -89,11 +126,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container( // Texto balance general
                   padding: EdgeInsets.only(bottom: 5.0),
                   child: Text(
-                    '\$ $_balanceGeneral',
+                    _balanceGeneral,
                     key: _tamanioTextoBalance,
                     style: TextStyle(
                       color: _balanceGeneral.startsWith('+') ? Colors.green : Colors.red,
-                      fontSize: 30,
+                      fontSize: 40,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -101,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 Container( // linea debajo del balance general
                   height: 1.0,
-                  width: _lineaAncho+30.0, // Asignar el tamanio de la linea dinamicamente
+                  width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
                   color: Colors.black,
                 ),
 
