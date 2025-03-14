@@ -185,6 +185,8 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
             ),
@@ -194,8 +196,10 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                 readOnly: false,
                 controller: _montoTEC,
                 decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso'
+                  border: const OutlineInputBorder(),
+                  labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
             ),
@@ -205,8 +209,10 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                 readOnly: false,
                 controller: _descripcionTEC,
                 decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso'
+                  border: const OutlineInputBorder(),
+                  labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
             ),
@@ -219,6 +225,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                   width: 1.0,
                 ),
                 borderRadius: BorderRadius.circular(4),
+                color: Colors.white
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton2<String>(
@@ -317,6 +324,312 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
 
 
 
+// Cuadro de de dialogo para editar un ingreso o egreso
+class CuadroDialogoEditar extends StatefulWidget {
+  const CuadroDialogoEditar({super.key,
+    required this.tipo,
+    required this.listaCategorias,
+    required this.usuario,
+    required this.elemento,
+    //required this.idElemento,
+    //required this.nombreElemento,
+    //required this.montoElemento,
+    //required this.descripcionElemento,
+    required this.categoriaElemento
+  });
+  final String tipo;
+  final List<Map<String, dynamic>> listaCategorias;
+  final String usuario;
+  final Map<String, dynamic> elemento;
+  //final int idElemento;
+  //final String nombreElemento;
+  //final String montoElemento;
+  //final String descripcionElemento;
+  final String categoriaElemento;
+
+
+  @override
+  State<CuadroDialogoEditar> createState() => _CuadroDialogoEditarState();
+}
+
+class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
+  late TextEditingController _nombreTEC = TextEditingController();
+  late TextEditingController _montoTEC = TextEditingController();
+  late TextEditingController _descripcionTEC = TextEditingController();
+  String? _categoriaSeleccionada;
+  bool _errorMonto = false;
+  double _monto = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombreTEC = TextEditingController(text: widget.elemento['nombre']);
+    _montoTEC = TextEditingController(text: widget.elemento['monto'].toString());
+    _descripcionTEC = TextEditingController(text: widget.elemento['descripcion']);
+    _categoriaSeleccionada = widget.categoriaElemento;
+  }
+
+  List<String> _obtenerCategorias(List<Map<String, dynamic>> lista) {
+    List<String> nombresCategorias = [];
+    lista.forEach((element) {
+      nombresCategorias.add(element['nombre']);
+    });
+    return nombresCategorias;
+  }
+
+  Future<bool> _guardarDatos(BuildContext context) async {
+    // try para identificar error al convertir tipo
+    try {
+      setState(() {
+        _monto = double.parse(_montoTEC.text);
+        _errorMonto = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMonto = true;
+      });
+      return false; // Sale de la operacion
+    }
+
+    if(widget.tipo=='ingreso') {  // Insertar ingreso
+      try {
+        // Hacer insercion
+        bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
+            widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
+            widget.elemento['fk_id_usuario'],
+            _nombreTEC.text,
+            _monto,
+            _descripcionTEC.text,
+            _categoriaSeleccionada ?? ''
+        );
+        return cargaExitosa;
+
+      } catch (e) {
+        return false;
+      }
+
+    } else if(widget.tipo=='egreso') {  // Insertar egreso
+      try {
+        // Hacer insercion
+        bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
+            widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
+            widget.elemento['fk_id_usuario'],
+            _nombreTEC.text,
+            _monto,
+            _descripcionTEC.text,
+            _categoriaSeleccionada ?? ''
+        );
+        return cargaExitosa;
+
+      } catch (e) {
+        return false;
+      }
+
+    } else {
+      return false; // No se inserto
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: Container(
+        //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+        width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              child: Text(
+                widget.tipo=='ingreso' ? 'Editar ingreso' : 'Editar egreso',
+                style: const TextStyle(
+                  fontSize: 30.0,
+                ),
+                softWrap: true,
+              ),
+            ),
+            const SizedBox(height: 20,),
+            Container( // Nombre del ingreso
+              child: TextField(
+                readOnly: false,
+                controller: _nombreTEC,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Container( // Monto del ingreso
+              child: TextField(
+                readOnly: false,
+                controller: _montoTEC,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Container( // Descripcion del ingreso
+              child: TextField(
+                readOnly: false,
+                controller: _descripcionTEC,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Container(
+              height: 60.0,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black54,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(4),
+                color: Colors.white,
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton2<String>(
+                  isExpanded: true,
+                  hint: Text(
+                    ' ',
+                    style: TextStyle(
+                        color: Theme.of(context).hintColor
+                    ),
+                  ),
+                  items: _obtenerCategorias(widget.listaCategorias)
+                      .map((String item) => DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(
+                      item[0].toUpperCase()+item.substring(1),
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ))
+                      .toList(),
+                  value: _categoriaSeleccionada,
+                  onChanged: (String? value) {
+                    setState(() {
+                      _categoriaSeleccionada = value;
+                    });
+                  },
+                  buttonStyleData: const ButtonStyleData(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    height: 40,
+                    width: double.maxFinite,
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 40,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20,),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  MaterialButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    color: Colors.grey,
+                    child: const Text(
+                      'Cancelar',
+                      style: TextStyle(
+                          color: Colors.black
+                      ),
+                    ),
+                  ),
+                  MaterialButton(
+                    onPressed: () {
+                      _guardarDatos(context).then((cargaCorrecta) {
+                        if(cargaCorrecta && widget.tipo=='ingreso') {
+                          // Si la carga se realizo se recarga la vista de ingresos
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                (Route<dynamic> route) => false,
+                          );
+                        } else if(cargaCorrecta && widget.tipo=='ingreso') {
+                          // Si la carga se realizo se recarga la vista de egresos
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                (Route<dynamic> route) => false,
+                          );
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text(
+                                    "Error",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  content: Text(
+                                      _errorMonto ? 'Valor del monto incorrecto.' : "No se pudo realizar la actualizacion del elemento."
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFF02013C),
+                                      ),
+                                      child: const Text("Aceptar"),
+                                    )
+                                  ],
+                                );
+                              }
+                          );
+                        }
+                      });
+
+
+                    },
+                    color: const Color(0xFF02013C),
+                    child: const Text(
+                      'Guardar',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 
 // Cuadro de de dialogo para mostrar detalles un ingreso o egreso
 class CuadroDialogoDetalles extends StatefulWidget {
@@ -381,7 +694,6 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          //crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Column(
               // Titulo de la ventana
@@ -648,7 +960,22 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                         const SizedBox(width: 12,),
                         MaterialButton(
                           onPressed: () {
-                            print("Editar");
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoEditar(
+                                      tipo: widget.tipo,
+                                      listaCategorias: widget.listaCategorias,
+                                      usuario: widget.usuario,
+                                      elemento: widget.elemento,
+                                      //idElemento: widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
+                                      //nombreElemento: widget.elemento['nombre'],
+                                      //montoElemento: widget.elemento['monto'].toString(),
+                                      //descripcionElemento: widget.elemento['descripcion'],
+                                      categoriaElemento: widget.categoriaElemento
+                                  );
+                                }
+                            );
                           },
                           color: const Color(0xFF02013C),
                           child: const Text(

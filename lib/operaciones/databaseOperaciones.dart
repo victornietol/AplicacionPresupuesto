@@ -365,6 +365,48 @@ class DataBaseOperaciones {
     }
   }
 
+  // Editar los datos de un ingreso
+  Future<bool> editarIngreso(int idIngreso, int fkId_Usuario, String nombreIngreso, double montoIngreso, String descripcionIngreso, String categoria) async {
+    final db = await database;
+    try {
+      int cambios = await db.update(
+          'ingreso',
+          {
+            'nombre': nombreIngreso,
+            'monto': montoIngreso,
+            'descripcion': descripcionIngreso,
+            'fk_id_categoria_ingreso': await obtenerIdCategoria('ingreso', categoria) ?? -1
+          },
+        where: 'id_ingreso = ? AND fk_id_usuario = ?',
+        whereArgs: [idIngreso, fkId_Usuario]
+      );
+      return cambios>0 ? true : false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Editar los datos de un egreso
+  Future<bool> editarEgreso(int idEgreso, int fkId_Usuario, String nombreEgreso, double montoEgreso, String descripcionEgreso, String categoria) async {
+    final db = await database;
+    try {
+      int cambios = await db.update(
+          'egreso',
+          {
+            'nombre': nombreEgreso,
+            'monto': montoEgreso,
+            'descripcion': descripcionEgreso,
+            'fk_id_categoria_egreso': obtenerIdCategoria('egreso', categoria)
+          },
+          where: 'id_egreso = ? AND fk_id_usuario = ?',
+          whereArgs: [idEgreso, fkId_Usuario]
+      );
+      return cambios>0 ? true : false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Obtener la suma de los ingresos de un usuario
   Future<Decimal> sumarIngresosTodos(String usuario) async {
     final db = await database;
