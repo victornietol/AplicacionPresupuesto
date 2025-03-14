@@ -331,20 +331,12 @@ class CuadroDialogoEditar extends StatefulWidget {
     required this.listaCategorias,
     required this.usuario,
     required this.elemento,
-    //required this.idElemento,
-    //required this.nombreElemento,
-    //required this.montoElemento,
-    //required this.descripcionElemento,
     required this.categoriaElemento
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
   final String usuario;
   final Map<String, dynamic> elemento;
-  //final int idElemento;
-  //final String nombreElemento;
-  //final String montoElemento;
-  //final String descripcionElemento;
   final String categoriaElemento;
 
 
@@ -561,55 +553,91 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
                   ),
                   MaterialButton(
                     onPressed: () {
-                      _guardarDatos(context).then((cargaCorrecta) {
-                        if(cargaCorrecta && widget.tipo=='ingreso') {
-                          // Si la carga se realizo se recarga la vista de ingresos
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
-                                (Route<dynamic> route) => false,
-                          );
-                        } else if(cargaCorrecta && widget.tipo=='ingreso') {
-                          // Si la carga se realizo se recarga la vista de egresos
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
-                                (Route<dynamic> route) => false,
-                          );
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Error",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  content: Text(
-                                      _errorMonto ? 'Valor del monto incorrecto.' : "No se pudo realizar la actualizacion del elemento."
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: const Color(0xFF02013C),
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text(
+                                "Alerta",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              content: const Text(
+                                "¿Confirmar los cambios?",
+                                softWrap: true,
+                              ),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text(
+                                      "Cancelar",
+                                      style: TextStyle(
+                                        color: Colors.black
                                       ),
-                                      child: const Text("Aceptar"),
                                     )
-                                  ],
-                                );
-                              }
-                          );
-                        }
-                      });
-
-
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _guardarDatos(context).then((cargaCorrecta) {
+                                      if(cargaCorrecta && widget.tipo=='ingreso') {
+                                        // Si la carga se realizo se recarga la vista de ingresos
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                              (Route<dynamic> route) => false,
+                                        );
+                                      } else if(cargaCorrecta && widget.tipo=='ingreso') {
+                                        // Si la carga se realizo se recarga la vista de egresos
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                              (Route<dynamic> route) => false,
+                                        );
+                                      } else {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text(
+                                                  "Error",
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold
+                                                  ),
+                                                ),
+                                                content: Text(
+                                                    _errorMonto ? 'Valor del monto incorrecto.' : "No se pudo realizar la actualizacion del elemento."
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                    style: TextButton.styleFrom(
+                                                      foregroundColor: const Color(0xFF02013C),
+                                                    ),
+                                                    child: const Text("Aceptar"),
+                                                  )
+                                                ],
+                                              );
+                                            }
+                                        );
+                                      }
+                                    });
+                                  },
+                                    child: const Text(
+                                        "Confirmar"
+                                    ),
+                                ),
+                              ],
+                            );
+                          }
+                      );
                     },
                     color: const Color(0xFF02013C),
                     child: const Text(
@@ -676,7 +704,6 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
       }
     } catch (e) {
       // Ocurrio un error
-      print("Ocurrio un error: $e");
       return false;
     }
 
@@ -968,10 +995,6 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                                       listaCategorias: widget.listaCategorias,
                                       usuario: widget.usuario,
                                       elemento: widget.elemento,
-                                      //idElemento: widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
-                                      //nombreElemento: widget.elemento['nombre'],
-                                      //montoElemento: widget.elemento['monto'].toString(),
-                                      //descripcionElemento: widget.elemento['descripcion'],
                                       categoriaElemento: widget.categoriaElemento
                                   );
                                 }
