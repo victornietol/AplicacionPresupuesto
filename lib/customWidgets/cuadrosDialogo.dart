@@ -277,15 +277,23 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                   ),
                   MaterialButton(
                     onPressed: () {
-                      _guardarDatos(context).then((cargaCorrecta) => {
-                        if(cargaCorrecta) {
-                          // Si la carga se realizo se recarga la vista
+                      _guardarDatos(context).then((cargaCorrecta) {
+                        if(cargaCorrecta && widget.tipo=='ingreso') {
+                          // Si la carga se realizo se recarga la vista de ingresos
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
                               (Route<dynamic> route) => false,
-                          )
+                          );
+                        } else if(cargaCorrecta && widget.tipo=='ingreso') {
+                          // Si la carga se realizo se recarga la vista de egresos
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                (Route<dynamic> route) => false,
+                          );
                         }
                       });
                     },
@@ -318,7 +326,8 @@ class CuadroDialogoDetalles extends StatefulWidget {
     required this.elemento,
     required this.categoriaElemento,
     required this.montoFormateado,
-    required this.porcentaje
+    required this.porcentaje,
+    required this.usuario
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
@@ -326,6 +335,7 @@ class CuadroDialogoDetalles extends StatefulWidget {
   final String categoriaElemento;
   final String montoFormateado;
   final double porcentaje;
+  final String usuario;
 
 
   @override
@@ -333,6 +343,31 @@ class CuadroDialogoDetalles extends StatefulWidget {
 }
 
 class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
+
+  String _formatearFecha(String fechaPlana) {
+    DateTime fecha = DateTime.parse(fechaPlana);
+    return DateFormat("dd/MM/yyyy,  h:mm a").format(fecha);
+  }
+
+  Future<bool> _eliminarElemento(String tipo, Map<String, dynamic> elemento) async {
+    try {
+      // Intentar eliminacion
+      if(tipo=='ingreso') {
+        bool eliminacionExitosa = await DataBaseOperaciones().eliminarIngreso(elemento['id_ingreso'], widget.usuario);
+        return eliminacionExitosa;
+      } else if(tipo=='egreso') {
+        bool eliminacionExitosa = await DataBaseOperaciones().eliminarEgreso(elemento['id_egreso'], widget.usuario);
+        return eliminacionExitosa;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      // Ocurrio un error
+      print("Ocurrio un error: $e");
+      return false;
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -429,7 +464,7 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                          widget.tipo=='ingreso' ? 'Porcentaje correspodiente al total del ingreso:' : 'Porcentaje correspodiente al total del egreso',
+                          widget.tipo=='ingreso' ? 'Porcentaje correspodiente al total de ingresos:' : 'Porcentaje correspodiente al total de egresos',
                       softWrap: true,
                       ),
                       Text(
@@ -471,10 +506,6 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                   width: double.maxFinite,
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(6.0),
-                      bottomRight: Radius.circular(6.0),
-                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -485,6 +516,33 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                       ),
                       Text(
                           widget.categoriaElemento[0].toUpperCase()+widget.categoriaElemento.substring(1),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2,),
+                Container( // Fecha de registro del ingreso
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(6.0),
+                      bottomRight: Radius.circular(6.0),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                          'Fecha de registro:'
+                      ),
+                      Text(
+                        _formatearFecha(widget.elemento['fecha_registro']),
                         style: const TextStyle(
                             fontWeight: FontWeight.bold
                         ),
@@ -505,7 +563,79 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                       children: <Widget>[
                         MaterialButton(
                           onPressed: () {
-                            print("Eliminar");
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                        "Alerta",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                    content: const Text(
+                                        "¿Esta seguro que desea eliminar el elemento?",
+                                      softWrap: true,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                              "Cancelar",
+                                            style: TextStyle(
+                                              color: Colors.black
+                                            ),
+                                          )
+                                      ),
+                                      TextButton(
+                                          onPressed: () {
+                                            _eliminarElemento(widget.tipo, widget.elemento).then((value) {
+                                              if(value && widget.tipo=='ingreso') {
+                                                // Si se realizo la eliminacion se carga la vista de ingresos
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                                      (Route<dynamic> route) => false,
+                                                );
+
+                                              } else if(value && widget.tipo=='egreso') {
+                                                // Si se realizo la eliminacion se carga la vista de egresos
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                                      (Route<dynamic> route) => false,
+                                                );
+
+                                              } else {
+                                                // No se realizo la operacion y se muestra cuadro de dialogo
+                                                Navigator.pop(context);
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Text("Ocurrio un error al eliminar el elemento."),
+                                                        actions: [
+                                                          TextButton(
+                                                              onPressed: () => Navigator.of(context).pop(),
+                                                              child: const Text("Aceptar"),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    }
+                                                );
+                                              }
+                                            });
+                                          },
+                                          child: Text("Confirmar")
+                                      ),
+                                    ],
+                                  );
+                                }
+                            );
                           },
                           color: Colors.red,
                           child: const Text(
@@ -535,7 +665,7 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                       children: <Widget>[
                         MaterialButton(
                           onPressed: () {
-                            print("Regresar");
+                            Navigator.of(context).pop();
                           },
                           color: Colors.grey,
                           child: const Text(

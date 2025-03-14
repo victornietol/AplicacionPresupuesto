@@ -203,6 +203,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                     listaElementos: _ingresosTodos,
                     totalIngresos: _totalIngresos,
                     listaCategorias: _categorias,
+                    usuario: widget.usuario,
                   ),
                   Text("Hola2"),
                   Text("Hola3"),

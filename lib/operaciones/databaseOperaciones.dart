@@ -316,9 +316,9 @@ class DataBaseOperaciones {
   }
 
   // Eliminar un ingreso de un usuario
-  Future<bool> eliminarIngreso(String ingreso, String usuario) async {
+  Future<bool> eliminarIngreso(int id_ingreso, String nombreUsuario) async {
     final db = await database;
-    final datosUsuario = await obtenerUsuario(usuario);
+    final datosUsuario = await obtenerUsuario(nombreUsuario);
 
     if(datosUsuario==null) {
       // No se encontro el usuario (no se realiza la eliminacion)
@@ -327,9 +327,9 @@ class DataBaseOperaciones {
       try {
         await db.delete(
             'ingreso',
-            where: 'nombre = ? AND fk_id_usuario = ?',
+            where: 'id_ingreso = ? AND fk_id_usuario = ?',
             whereArgs: [
-              ingreso,
+              id_ingreso,
               datosUsuario['id_usuario']
             ]
         );
@@ -341,9 +341,9 @@ class DataBaseOperaciones {
   }
 
   // Eliminar un ingreso de un usuario
-  Future<bool> eliminarEgreso(String egreso, String usuario) async {
+  Future<bool> eliminarEgreso(int id_egreso, String nombreUsuario) async {
     final db = await database;
-    final datosUsuario = await obtenerUsuario(usuario);
+    final datosUsuario = await obtenerUsuario(nombreUsuario);
 
     if(datosUsuario==null) {
       // No se encontro el usuario (no se realiza la eliminacion)
@@ -352,9 +352,9 @@ class DataBaseOperaciones {
       try {
         await db.delete(
             'egreso',
-            where: 'nombre = ? AND fk_id_usuario = ?',
+            where: 'id_egreso = ? AND fk_id_usuario = ?',
             whereArgs: [
-              egreso,
+              id_egreso,
               datosUsuario['id_usuario']
             ]
         );

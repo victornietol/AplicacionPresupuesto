@@ -9,12 +9,14 @@ class BotonIngresoEgreso extends StatefulWidget {
     required this.tipo,
     required this.listaElementos,
     required this.totalIngresos,
-    required this.listaCategorias
+    required this.listaCategorias,
+    required this.usuario
   });
   final String tipo; // Indica si es Ingreso o Egreso
   final List<Map<String, dynamic>> listaElementos; // Datos completos de ingresos o egresos
   final Decimal totalIngresos;
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
+  final String usuario;
 
 
   @override
@@ -73,7 +75,8 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                             elemento: elemento,
                             categoriaElemento: categoria,
                             montoFormateado: montoFormateado,
-                            porcentaje: porcentaje
+                            porcentaje: porcentaje,
+                            usuario: widget.usuario
                         );
                       }
                   )
