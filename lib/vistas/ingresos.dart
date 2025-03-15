@@ -29,6 +29,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
   bool _cargandoTotal = true;
   bool _cargandoIngresosTodos = true;
 
+  //List<Widget> _listaWidgets = []; // Lista con el cuerpo de cada pestaña del TabBar
+
 
 
   @override
@@ -66,17 +68,6 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
       _obtenerTamanioTexto();
     });
 
-    // datos de ejemplo ingresos y egresos
-    //DataBaseOperaciones().insertarIngreso({
-    //  'nombre': 'ingrso1',
-    //  'monto': 1000,
-    //  'descripcion': 'DEscp1',
-    //  'fecha_registro': DateTime.now().toIso8601String(),
-    //  'fk_id_usuario':1,
-    //  'fk_id_categoria_ingreso':1
-    //});
-
-
   }
 
   // Formatear cantidad de dinero
@@ -84,6 +75,42 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     //final formato = NumberFormat("#,##0.00", "es_MX");
     final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
     return formatoDinero.format(monto);
+  }
+
+  // Crear contenido del TabBar
+  List<Widget> _crearWidgetsElementos() {
+    List<Widget> listaWidgets = [];
+
+    // Widgets de la pestaña todos
+    listaWidgets.add(
+      BotonIngresoEgreso(
+        tipo: 'ingreso',
+        listaElementos: _ingresosTodos,
+        totalIngresos: _totalIngresos,
+        listaCategorias: _categorias,
+        usuario: widget.usuario,
+      ),
+    );
+
+    // Widgets de las pestañas de cada categoria
+    for(var categoria in _categorias) {
+      // filtrar los elementos de cada categoria
+      List<Map<String, dynamic>> ingresosCategoria = _ingresosTodos.where(
+              (element) => element['fk_id_categoria_ingreso']==categoria['id_categoria']
+      ).toList();
+
+      listaWidgets.add(
+        BotonIngresoEgreso(
+            tipo: 'ingreso',
+            listaElementos: ingresosCategoria,
+            totalIngresos: _totalIngresos,
+            listaCategorias: _categorias,
+            usuario: widget.usuario
+        ),
+      );
+    }
+
+    return listaWidgets;
   }
 
 
@@ -194,7 +221,9 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
           Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
+                children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
+                    /*
+                [
                   //_buildScrollableList("Publicaciones"),
                   //_buildScrollableList("Respuestas"),
                   //_buildScrollableList("Destacados"),
@@ -208,6 +237,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                   Text("Hola2"),
                   Text("Hola3"),
                 ],
+
+                     */
               )
           ),
 
