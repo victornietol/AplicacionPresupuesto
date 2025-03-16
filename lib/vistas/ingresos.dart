@@ -4,6 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class Ingresos extends StatefulWidget{
   const Ingresos({super.key, required this.title, required this.usuario});
@@ -77,7 +78,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     return formatoDinero.format(monto);
   }
 
-  // Crear contenido del TabBar
+  // Crear contenido de cada pestaña deñ TabBar
   List<Widget> _crearWidgetsElementos() {
     List<Widget> listaWidgets = [];
 
@@ -89,6 +90,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
         totalIngresos: _totalIngresos,
         listaCategorias: _categorias,
         usuario: widget.usuario,
+        mostrarTotalIngresosCategoria: false
       ),
     );
 
@@ -105,7 +107,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
             listaElementos: ingresosCategoria,
             totalIngresos: _totalIngresos,
             listaCategorias: _categorias,
-            usuario: widget.usuario
+            usuario: widget.usuario,
+            mostrarTotalIngresosCategoria: true,
         ),
       );
     }
@@ -167,37 +170,43 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
           Container(
             width: double.infinity, // Se ajusta a toda la pantalla
             padding: EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container( // Texto balance general
-                  padding: EdgeInsets.only(bottom: 5.0),
-                  child: Text(
-                    //'\$ $_totalIngresosText',
-                    formatearCantidad(_totalIngresos.toDouble()),
-                    key: _tamanioTextoBalance,
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
+            child: MaterialButton(
+              onPressed: () {
+                // Motrar grafica
+                print("Grafica todos");
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container( // Texto balance general
+                    padding: EdgeInsets.only(bottom: 5.0),
+                    child: Text(
+                      //'\$ $_totalIngresosText',
+                      formatearCantidad(_totalIngresos.toDouble()),
+                      key: _tamanioTextoBalance,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                Container( // linea debajo del balance general
-                  height: 1.0,
-                  width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
-                  color: Colors.black,
-                ),
-                const SizedBox(height: 10.0), // espacio
-                const Text(
-                  "Total ingresos",
-                  style: TextStyle(
+                  Container( // linea debajo del balance general
+                    height: 1.0,
+                    width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
                     color: Colors.black,
-                    letterSpacing: 2.0,
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 10.0), // espacio
+                  const Text(
+                    "Total ingresos",
+                    style: TextStyle(
+                      color: Colors.black,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ],
+              ),
+            )
           ),
 
 

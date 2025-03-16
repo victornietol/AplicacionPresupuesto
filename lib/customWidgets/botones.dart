@@ -3,21 +3,24 @@ import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:calculadora_presupuesto/customWidgets/otrosWidgets.dart';
 
-// Boton con previsualizacion del monto del ingreso o egreso
+// Widget con el contenido de cada pestaña
 class BotonIngresoEgreso extends StatefulWidget {
   const BotonIngresoEgreso({super.key,
     required this.tipo,
     required this.listaElementos,
     required this.totalIngresos,
     required this.listaCategorias,
-    required this.usuario
+    required this.usuario,
+    required this.mostrarTotalIngresosCategoria
   });
   final String tipo; // Indica si es Ingreso o Egreso
   final List<Map<String, dynamic>> listaElementos; // Datos completos de ingresos o egresos
   final Decimal totalIngresos;
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
   final String usuario;
+  final bool mostrarTotalIngresosCategoria;
 
 
   @override
@@ -34,10 +37,15 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
 
   List<Map<String, dynamic>> _listaElementosMutable = [];
 
+  double _sumaTotalCategoria = 0.0;
+  double _porcentajeCategoria = 0.0;
+
   @override
   void initState() {
     super.initState();
     _listaElementosMutable = List.from(widget.listaElementos); // Hacer mutable la lista para poder ordenarla
+    _sumaTotalCategoria = _obtenerSumaTotalCategoria(widget.listaElementos);
+    _porcentajeCategoria = _obtenerPorcentajeCategoria(_sumaTotalCategoria, widget.totalIngresos.toDouble());
     _crearWidgetsTodos();
   }
 
@@ -75,7 +83,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
     }
   }
   
-  // Pestaña todos
+  // Crear widgets con los botones que muestran los ingresos o egresos
   void _crearWidgetsTodos() {
     double tamanioTextPrincipal = 20.0;
     botones.clear(); // Evitar duplicados
@@ -124,6 +132,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                           children: [
                             Text( // Nombre de elemento
                                 elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
+                              softWrap: true,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: tamanioTextPrincipal,
@@ -138,6 +147,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                             ),
                           ],
                         ),
+
                         Column( // parte derecha
                           crossAxisAlignment: CrossAxisAlignment.end, // ----------
                           children: [
@@ -147,7 +157,39 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                                 fontSize: tamanioTextPrincipal,
                               ),
                             ),
-                            Container(
+                            if(widget.mostrarTotalIngresosCategoria) // Si es una pestaña de una categoria (no se muestra en pestaña 'todos')
+                              Row(
+                                children: <Widget>[
+                                  EtiquetaPorcentaje( // Porcentaje
+                                    texto: '${((elemento['monto']*100.0) / _sumaTotalCategoria).toStringAsFixed(2)}%', // Porcentaje respecto al total de la categoria actual
+                                    colorFondo: const Color(0xffdae9ff),
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.indigo,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 2.0,),
+                                  EtiquetaPorcentaje( // Porcentaje
+                                    texto: '${porcentaje.toStringAsFixed(2)}%', // Porcentaje respecto al total de ingresos o egresos
+                                    colorFondo: const Color(0xFFd4fed7),
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else // Si es la pestaña todos
+                              EtiquetaPorcentaje( // Porcentajes
+                                  texto: '${porcentaje.toStringAsFixed(2)}%',
+                                  colorFondo: const Color(0xFFd4fed7),
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
+                                  ),
+                              ),
+                            /*
+                            Container( // Porcentajes
                               color: Color(0xFFd4fed7),
                               padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                               child: Text(
@@ -157,6 +199,8 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                                 ),
                               ),
                             ),
+
+                             */
 
                           ],
                         ),
@@ -181,13 +225,72 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
     setState(() {});
   }
 
+  // Obtener suma total de los elementos por categoria
+  double _obtenerSumaTotalCategoria(List<Map<String, dynamic>> elementosCategoria) {
+    return widget.listaElementos.fold<Decimal>(
+        Decimal.zero, (total, element) => total + Decimal.parse(element['monto'].toString())
+    ).toDouble();
+  }
 
-
+  // Obtener porcentaje de la suma de la categoria respecto al total
+  double _obtenerPorcentajeCategoria(double totalCategoria, double totalElementos) {
+    return (totalCategoria*100) / totalElementos;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column( // Esto es lo que regresa el widget
       children: [
+        // Mostrar total de ingresos por categoria (no se muestra en la pestaña 'todos')
+        if(widget.mostrarTotalIngresosCategoria)
+          Column(
+            children: [
+              // Texto de total de la categoria
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const EtiquetaPorcentaje(
+                    texto: "Total de esta categoria:",
+                    colorFondo: Color(0xffdae9ff),
+                    textStyle: TextStyle(
+                      color: Colors.indigo,
+                    ),
+                    /*
+                  colorTexto: Colors.green,
+                  textSize: 20.0,
+                  fontWeight: FontWeight.bold,
+
+                   */
+                  ),
+                  EtiquetaPorcentaje(
+                    texto: "${formatearCantidad(_sumaTotalCategoria)} (${_porcentajeCategoria.toStringAsFixed(2)}%)",
+                    colorFondo: const Color(0xffdae9ff),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo,
+                    ),
+                    /*
+                  colorTexto: Colors.green,
+                  textSize: 20.0,
+                  fontWeight: FontWeight.bold,
+
+                   */
+                  ),
+                ],
+              ),
+              // Barra porcentaje del total
+              BarraProgreso(
+                  labelInicio: formatearCantidad(0.0),
+                  labelFinal: formatearCantidad(widget.totalIngresos.toDouble()),
+                  porcentajeProgreso: _porcentajeCategoria,
+                  colorBarraPrincipal: Colors.indigo,
+                  colorBarraSecundario: Colors.green,
+              ),
+            ],
+          ),
+
+
+
         // Botones de ordenamiento
         Row(
           children: [
