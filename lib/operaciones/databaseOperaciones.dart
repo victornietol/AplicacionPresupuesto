@@ -396,13 +396,14 @@ class DataBaseOperaciones {
             'nombre': nombreEgreso,
             'monto': montoEgreso,
             'descripcion': descripcionEgreso,
-            'fk_id_categoria_egreso': obtenerIdCategoria('egreso', categoria)
+            'fk_id_categoria_egreso': await obtenerIdCategoria('egreso', categoria) ?? -1
           },
           where: 'id_egreso = ? AND fk_id_usuario = ?',
           whereArgs: [idEgreso, fkId_Usuario]
       );
       return cambios>0 ? true : false;
     } catch (e) {
+      print("ERRROR: $e");
       return false;
     }
   }
@@ -484,13 +485,13 @@ class DataBaseOperaciones {
   Future<Decimal> sumarEgresosCategoria(String categoria, String usuario) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
-    final idCat = await obtenerIdCategoria('egresos', categoria);
+    final idCat = await obtenerIdCategoria('egreso', categoria);
 
     if(datosUsuario==null || idCat==null) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
-        const consulta = 'SELECT SUM(monto) AS suma FROM egreso WHERE fk_id_usuario = ? AND fk_id_categoria_ingreso = ?';
+        const consulta = 'SELECT SUM(monto) AS suma FROM egreso WHERE fk_id_usuario = ? AND fk_id_categoria_egreso = ?';
         final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idCat]);
 
         if(sumaTotal.isNotEmpty && sumaTotal.first['suma'] !=null) {

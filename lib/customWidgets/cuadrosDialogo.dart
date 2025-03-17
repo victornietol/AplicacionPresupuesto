@@ -252,6 +252,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                           style: const TextStyle(
                             fontSize: 14,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ))
                     .toList(),
@@ -268,6 +269,20 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                   ),
                   menuItemStyleData: const MenuItemStyleData(
                     height: 40,
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    maxHeight: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
+                    offset: const Offset(0, -5),
+                    scrollbarTheme: ScrollbarThemeData(
+                      radius: const Radius.circular(40),
+                      thickness: MaterialStateProperty.all(6),
+                      thumbVisibility: MaterialStateProperty.all(true),
+                      thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
+                    ),
                   ),
                 ),
               ),
@@ -301,7 +316,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                                   builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
                               (Route<dynamic> route) => false,
                           );
-                        } else if(cargaCorrecta && widget.tipo=='ingreso') {
+                        } else if(cargaCorrecta && widget.tipo=='egreso') {
                           // Si la carga se realizo se recarga la vista de egresos
                           Navigator.pushAndRemoveUntil(
                             context,
@@ -398,7 +413,7 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
         }
         // Hacer insercion
         bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
-            widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
+            widget.elemento['id_ingreso'],
             widget.elemento['fk_id_usuario'],
             _nombreTEC.text,
             _monto,
@@ -417,8 +432,8 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
           throw Exception("Campo vacio");
         }
         // Hacer insercion
-        bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
-            widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
+        bool cargaExitosa = await DataBaseOperaciones().editarEgreso(
+            widget.elemento['id_egreso'],
             widget.elemento['fk_id_usuario'],
             _nombreTEC.text,
             _monto,
@@ -544,6 +559,20 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
                   menuItemStyleData: const MenuItemStyleData(
                     height: 40,
                   ),
+                  dropdownStyleData: DropdownStyleData(
+                    maxHeight: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
+                    offset: const Offset(0, -5),
+                    scrollbarTheme: ScrollbarThemeData(
+                      radius: const Radius.circular(40),
+                      thickness: MaterialStateProperty.all(6),
+                      thumbVisibility: MaterialStateProperty.all(true),
+                      thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -605,7 +634,7 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
                                               builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
                                               (Route<dynamic> route) => false,
                                         );
-                                      } else if(cargaCorrecta && widget.tipo=='ingreso') {
+                                      } else if(cargaCorrecta && widget.tipo=='egreso') {
                                         // Si la carga se realizo se recarga la vista de egresos
                                         Navigator.pushAndRemoveUntil(
                                           context,
@@ -1057,7 +1086,6 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
 
 
 // Grafica del resumen 1
-
 class GraficaBarras extends StatefulWidget {
   const GraficaBarras({super.key,
     required this.tipo,

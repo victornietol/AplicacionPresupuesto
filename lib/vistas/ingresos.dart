@@ -192,11 +192,23 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return GraficaBarras(
-                        tipo: 'ingreso',
-                        sumaTotalElementos: _totalIngresos.toDouble(),
-                        listaCantidades: _sumaTotalPorCategoria,
-                      );
+                      if (_ingresosTodos.isNotEmpty) {
+                        return GraficaBarras(
+                          tipo: 'ingreso',
+                          sumaTotalElementos: _totalIngresos.toDouble(),
+                          listaCantidades: _sumaTotalPorCategoria,
+                        );
+                      } else { // Si hay elementos para graficar
+                        return AlertDialog(
+                          content: const Text("Aun no hay elementos para mostrar."),
+                          actions: [
+                            MaterialButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text("Aceptar"),
+                            )
+                          ],
+                        );
+                      }
                     }
                 );
 
@@ -242,6 +254,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
             controller: _tabController,
               //labelColor: const Color(0xFF02013C),
               unselectedLabelColor: Colors.grey,
+              isScrollable: true,
               tabs: [ // Con cada elemento de mi lista generar una pestania
                 const Tab(text: 'Todos'),
                 ..._categorias.map(
