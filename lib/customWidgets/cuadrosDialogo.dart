@@ -3,6 +3,7 @@ import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 // Cuadro de de dialogo para agregar un ingreso o egreso
 class CuadroDialogoAgregar extends StatefulWidget {
@@ -41,6 +42,10 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
 
     if(widget.tipo=='ingreso') {  // Insertar ingreso
       try {
+        // Verificar que no sean campos vacios
+        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+          throw Exception("Campo vacio");
+        }
         datos['nombre']=_nombreTEC.text;
         datos['monto']=double.parse(_montoTEC.text); // pasar a numerico para hacer la insercion
         datos['descripcion']=_descripcionTEC.text;
@@ -95,6 +100,9 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
 
     } else if(widget.tipo=='egreso') {  // Insertar egreso
       try {
+        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+          throw Exception("Campo vacio");
+        }
         datos['nombre']=_nombreTEC.text;
         datos['monto']=double.parse(_montoTEC.text); // pasar a numerico para hacer la insercion
         datos['descripcion']=_descripcionTEC.text;
@@ -385,6 +393,9 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
 
     if(widget.tipo=='ingreso') {  // Insertar ingreso
       try {
+        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+          throw Exception("Campo vacio");
+        }
         // Hacer insercion
         bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
             widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
@@ -402,6 +413,9 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
 
     } else if(widget.tipo=='egreso') {  // Insertar egreso
       try {
+        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+          throw Exception("Campo vacio");
+        }
         // Hacer insercion
         bool cargaExitosa = await DataBaseOperaciones().editarIngreso(
             widget.tipo=='ingreso' ? widget.elemento['id_ingreso'] : widget.elemento['id_egreso'],
@@ -1038,5 +1052,146 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
       ),
     );
   }
+}
+
+
+
+// Grafica del resumen 1
+
+class GraficaBarras extends StatefulWidget {
+  const GraficaBarras({super.key,
+    required this.tipo,
+    required this.listaCantidades,
+    required this.sumaTotalElementos,
+  });
+  final String tipo;
+  final Map<String, dynamic> listaCantidades;
+  final double sumaTotalElementos;
+
+  @override
+  State<GraficaBarras> createState() => _GraficaBarrasState();
+}
+
+class _GraficaBarrasState extends State<GraficaBarras> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.95, //Ancho de la pantalla
+        padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Column(
+            // Contenido de widget
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Partes que componene al widget (Cuerpo)
+                Text(
+                  widget.tipo=='ingreso' ? 'Grafica de ingresos' : 'Grafica de egresos',
+                  style: const TextStyle(
+                    fontSize: 30.0,
+                  ),
+                  softWrap: true,
+                ),
+                const SizedBox(height: 10,),
+
+                // Grafica
+                SizedBox(
+                    height: 400,
+                    child: BarChart(
+                        BarChartData(
+                            borderData: borderData,
+                            //gridData: const FlGridData(show: false),
+                            //backgroundColor: Colors.white,
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: widget.listaCantidades.values.reduce((a, b) { return a>b ? a : b; }), // obtener el valor maximo para Y
+                            barGroups: widget.listaCantidades.entries.toList().asMap().entries.map((entry) {
+                              int index = entry.key; // indice manual
+                              MapEntry<String, dynamic> datosEntry = entry.value; // entrada del map
+                              double cantidad = datosEntry.value; // monto de la categoria
+                              String titulo = datosEntry.key; // nombre de la categoria
+
+                              return BarChartGroupData(
+                                  x: index, // Indice de la barra del grafico
+                                  barRods: [
+                                    BarChartRodData( // Barras
+                                      toY: cantidad, // altura de la barra (eje Y)
+                                      color: widget.tipo=='ingreso' ? Colors.green : Colors.red,
+                                      width: 60/widget.listaCantidades.length, // ancho de la barras
+                                    ),
+                                  ],
+                                  //showingTooltipIndicators: [0] // Donde mostrar tooltip
+                              );
+                            }).toList(),
+                            titlesData: FlTitlesData(
+                                leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false)
+                                ),
+                                rightTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)
+                                ),
+                                topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)
+                                ),
+                                bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                        showTitles: true,
+                                        getTitlesWidget: (double value, TitleMeta meta) {
+                                          // Obtener titulo
+                                          int index = value.toInt();
+                                          if(index>=0 && index<widget.listaCantidades.length) {
+                                            String titulo = widget.listaCantidades.keys.elementAt(index)[0].toUpperCase()+widget.listaCantidades.keys.elementAt(index).substring(1); // obtener categoria
+                                            return SideTitleWidget(
+                                              axisSide: meta.axisSide,
+                                              child: Text(
+                                                  titulo
+                                              ),
+                                            );
+                                          }
+                                          // Si no hay valores validos no se muestra nada
+                                          return Container();
+                                        },
+                                        reservedSize: 30 // espacio para los titulos del eje X
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                const SizedBox(height: 20,),
+
+                Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    color: const Color(0xFF02013C),
+                  ),
+                  child: MaterialButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text(
+                        "Cerrar",
+                      style: TextStyle(
+                        color: Colors.white
+                      ),
+                    ),
+                  ),
+                ),
+
+              ]
+          ),
+        )
+      )
+    );
+  }
+
+
+  // Bordes de la grafica
+  FlBorderData get borderData => FlBorderData(
+    show: false,
+  );
 }
 

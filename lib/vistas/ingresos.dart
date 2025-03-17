@@ -4,7 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 
 class Ingresos extends StatefulWidget{
   const Ingresos({super.key, required this.title, required this.usuario});
@@ -19,6 +19,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
   late TabController _tabController; //  Sincronizar las pestañas
 
   late List<Map<String, dynamic>> _categorias;
+  late Map<String, dynamic> _sumaTotalPorCategoria;
   late List<Map<String, dynamic>> _ingresosTodos; // Datos de mi ingresos
   String _totalIngresosText = '+0';
   Decimal _totalIngresos = Decimal.fromInt(0);
@@ -43,6 +44,12 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
       setState(() {
         _categorias = listaCat;
         _tabController = TabController(length: listaCat.length+1, vsync: this);
+
+        // Obtener suma del monto total por categoria
+        _obtenerSumaTotalPorCategorias(listaCat).then((value) {
+          _sumaTotalPorCategoria = value;
+        });
+
         _cargandoCategorias = false; // datos cargados
       });
     });
@@ -68,6 +75,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _obtenerTamanioTexto();
     });
+
+
 
   }
 
@@ -116,11 +125,17 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     return listaWidgets;
   }
 
-
-
-
-
-
+  // obtener suma del monto total de cada categoria pasando como argumento la lista de categorias
+  Future<Map<String, dynamic>> _obtenerSumaTotalPorCategorias(List<Map<String, dynamic>> listaCategorias) async {
+    Map<String, dynamic> sumaTotalPorCategorias = {};
+    for(var categoria in listaCategorias) {
+      // Obtener monto
+      Decimal monto = await DataBaseOperaciones().sumarIngresosCategoria(categoria['nombre'], widget.usuario);
+      // Guardar elemento
+      sumaTotalPorCategorias[categoria['nombre']] = monto.toDouble();
+    }
+    return sumaTotalPorCategorias;
+  }
 
 
   @override
@@ -173,7 +188,19 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
             child: MaterialButton(
               onPressed: () {
                 // Motrar grafica
-                print("Grafica todos");
+
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return GraficaBarras(
+                        tipo: 'ingreso',
+                        sumaTotalElementos: _totalIngresos.toDouble(),
+                        listaCantidades: _sumaTotalPorCategoria,
+                      );
+                    }
+                );
+
+
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
