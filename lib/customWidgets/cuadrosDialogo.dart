@@ -1280,10 +1280,11 @@ class _GraficaBarras2State extends State<GraficaBarras2> {
                           scrollDirection: Axis.horizontal,
                           child: SizedBox(
                             width: widget.listaCantidades.length*80, // ancho dependiendo del numero de elementos
-                            child: Stack(
-                              children: <Widget>[
-                                // Grafica
-                                BarChart(
+                            child: TweenAnimationBuilder<double>( // Animador para la barra
+                              duration: const Duration(milliseconds: 600),
+                              tween: Tween(begin: 0, end: 1),
+                              builder: (context, animationValue, child) {
+                                return BarChart( // Grafica de barras
                                     BarChartData(
                                         borderData: FlBorderData(show: false),
                                         alignment: BarChartAlignment.spaceAround,
@@ -1297,7 +1298,7 @@ class _GraficaBarras2State extends State<GraficaBarras2> {
                                             x: index, // Indice de la barra del grafico
                                             barRods: [
                                               BarChartRodData( // Barras
-                                                toY: cantidad, // altura de la barra (eje Y)
+                                                toY: cantidad * animationValue, // altura de la barra (eje Y)
                                                 color: Colors.primaries[index % Colors.primaries.length], // Agregar color dinamicamente
                                                 width: 30, // ancho de la barras
                                               ),
@@ -1342,10 +1343,9 @@ class _GraficaBarras2State extends State<GraficaBarras2> {
                                             )
                                         )
                                     )
-                                ),
-
-                              ],
-                            )
+                                );
+                              },
+                            ),
                           ),
                         )
                     ),
