@@ -1229,3 +1229,172 @@ class _GraficaBarrasState extends State<GraficaBarras> {
   );
 }
 
+
+
+// Grafica del resumen 2
+class GraficaBarras2 extends StatefulWidget {
+  const GraficaBarras2({super.key,
+    required this.tipo,
+    required this.listaCantidades,
+    required this.sumaTotalElementos,
+  });
+  final String tipo;
+  final Map<String, dynamic> listaCantidades;
+  final double sumaTotalElementos;
+
+  @override
+  State<GraficaBarras2> createState() => _GraficaBarras2State();
+}
+
+class _GraficaBarras2State extends State<GraficaBarras2> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child: Container(
+            width: MediaQuery.of(context).size.width * 0.95, //Ancho de la pantalla
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                // Contenido de widget
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    // Partes que componene al widget (Cuerpo)
+                    Text(
+                      widget.tipo=='ingreso' ? 'Grafica de ingresos' : 'Grafica de egresos',
+                      style: const TextStyle(
+                        fontSize: 30.0,
+                      ),
+                      softWrap: true,
+                    ),
+                    const SizedBox(height: 10,),
+
+                    // Grafica Scroll horizontal
+                    SizedBox(
+                        height: 400,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SizedBox(
+                            width: widget.listaCantidades.length*80, // ancho dependiendo del numero de elementos
+                            child: Stack(
+                              children: <Widget>[
+                                // Grafica
+                                BarChart(
+                                    BarChartData(
+                                        borderData: FlBorderData(show: false),
+                                        alignment: BarChartAlignment.spaceAround,
+                                        maxY: widget.listaCantidades.values.reduce((a, b) => a>b ? a : b)*1.1, // obtener el valor maximo para Y
+                                        barGroups: widget.listaCantidades.entries.toList().asMap().entries.map((entry) {
+                                          int index = entry.key; // indice manual
+                                          MapEntry<String, dynamic> datosEntry = entry.value; // entrada del map
+                                          double cantidad = datosEntry.value; // monto de la categoria
+
+                                          return BarChartGroupData(
+                                            x: index, // Indice de la barra del grafico
+                                            barRods: [
+                                              BarChartRodData( // Barras
+                                                toY: cantidad, // altura de la barra (eje Y)
+                                                color: Colors.primaries[index % Colors.primaries.length], // Agregar color dinamicamente
+                                                width: 30, // ancho de la barras
+                                              ),
+                                            ],
+                                            //showingTooltipIndicators: [0] // Donde mostrar tooltip
+                                          );
+                                        }).toList(),
+                                        titlesData: FlTitlesData(
+                                            leftTitles: const AxisTitles(
+                                                sideTitles: SideTitles(showTitles: false)
+                                            ),
+                                            rightTitles: const AxisTitles(
+                                                sideTitles: SideTitles(showTitles: false)
+                                            ),
+                                            topTitles: const AxisTitles(
+                                                sideTitles: SideTitles(showTitles: false)
+                                            ),
+                                            bottomTitles: AxisTitles(
+                                                sideTitles: SideTitles(
+                                                    showTitles: true,
+                                                    getTitlesWidget: (double value, TitleMeta meta) {
+                                                      // Obtener titulo
+                                                      int index = value.toInt();
+                                                      if(index>=0 && index<widget.listaCantidades.length) {
+                                                        String titulo = widget.listaCantidades.keys.elementAt(index)[0].toUpperCase()+widget.listaCantidades.keys.elementAt(index).substring(1); // obtener categoria
+                                                        return SideTitleWidget(
+                                                          axisSide: meta.axisSide,
+                                                          child: Transform.rotate(
+                                                            angle: -0.6, // Rotar texto
+                                                            child: Text(
+                                                              titulo,
+                                                              style: const TextStyle(fontSize: 12),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                      // Si no hay valores validos no se muestra nada
+                                                      return Container();
+                                                    },
+                                                    reservedSize: 60 // espacio para los titulos del eje X
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+                              ],
+                            )
+                          ),
+                        )
+                    ),
+                    const SizedBox(height: 20,),
+
+                    // Leyenda de colores
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: widget.listaCantidades.entries.toList().asMap().entries.map((entry) {
+                        int index = entry.key;
+                        String categoria = entry.value.key;
+                        return Row(
+                          children: <Widget>[
+                            Container(
+                              width: 15,
+                              height: 15,
+                              color: Colors.primaries[index % Colors.primaries.length],
+                            ),
+                            const SizedBox(width: 8,),
+                            Text(categoria[0].toUpperCase()+categoria.substring(1))
+                          ],
+                        );
+                      }).toList(),
+                    ),
+
+                    const SizedBox(height: 20,),
+                    // Boton cerrar
+                    Container(
+                      height: 35,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.0),
+                        color: const Color(0xFF02013C),
+                      ),
+                      child: MaterialButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          "Cerrar",
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ]
+              ),
+            )
+        )
+    );
+  }
+
+}

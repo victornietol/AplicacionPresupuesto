@@ -193,7 +193,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                     context: context,
                     builder: (BuildContext context) {
                       if (_ingresosTodos.isNotEmpty) {
-                        return GraficaBarras(
+                        return GraficaBarras2(
                           tipo: 'ingreso',
                           sumaTotalElementos: _totalIngresos.toDouble(),
                           listaCantidades: _sumaTotalPorCategoria,

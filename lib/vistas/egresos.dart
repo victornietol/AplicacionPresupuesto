@@ -228,7 +228,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                       context: context,
                       builder: (BuildContext context) {
                         if(_egresosTodos.isNotEmpty) { // Si hay elementos para graficar
-                          return GraficaBarras(
+                          return GraficaBarras2(
                             tipo: 'egreso',
                             sumaTotalElementos: _totalEgresos.toDouble(),
                             listaCantidades: _sumaTotalPorCategoria,
