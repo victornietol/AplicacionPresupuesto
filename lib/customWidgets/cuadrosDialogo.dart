@@ -168,177 +168,179 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10)
       ),
-      child: Container(
-        //height: MediaQuery.of(context).size.height,// Altura de la pantalla
-        width: MediaQuery.of(context).size.width, //Ancho de la pantalla
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              child: Text(
+      child: SingleChildScrollView(
+        child: Container(
+          //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: Text(
                   widget.tipo=='ingreso' ? 'Nuevo ingreso' : 'Nuevo egreso',
-                style: const TextStyle(
-                  fontSize: 30.0,
-                ),
-                softWrap: true,
-              ),
-            ),
-            const SizedBox(height: 20,),
-            Container( // Nombre del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _nombreTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container( // Monto del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _montoTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container( // Descripcion del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _descripcionTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container(
-              height: 60.0,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black54,
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.white
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton2<String>(
-                  isExpanded: true,
-                  hint: Text(
-                    'Selecciona una categoria',
-                    style: TextStyle(
-                        color: Theme.of(context).hintColor
-                    ),
+                  style: const TextStyle(
+                    fontSize: 30.0,
                   ),
-                  items: _obtenerCategorias(widget.listaCategorias)
-                    .map((String item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(
-                          item[0].toUpperCase()+item.substring(1),
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20,),
+              Container( // Nombre del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _nombreTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10,),
+              Container( // Monto del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _montoTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10,),
+              Container( // Descripcion del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _descripcionTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10,),
+              Container(
+                height: 60.0,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black54,
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.white
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    hint: Text(
+                      'Selecciona una categoria',
+                      style: TextStyle(
+                          color: Theme.of(context).hintColor
+                      ),
+                    ),
+                    items: _obtenerCategorias(widget.listaCategorias)
+                        .map((String item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item[0].toUpperCase()+item.substring(1),
+                        style: const TextStyle(
+                          fontSize: 14,
                         ),
-                      ))
-                    .toList(),
-                  value: _categoriaSeleccionada,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _categoriaSeleccionada = value;
-                    });
-                  },
-                  buttonStyleData: const ButtonStyleData(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    height: 40,
-                    width: double.maxFinite,
-                  ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 40,
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    maxHeight: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ))
+                        .toList(),
+                    value: _categoriaSeleccionada,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _categoriaSeleccionada = value;
+                      });
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      height: 40,
+                      width: double.maxFinite,
                     ),
-                    offset: const Offset(0, -5),
-                    scrollbarTheme: ScrollbarThemeData(
-                      radius: const Radius.circular(40),
-                      thickness: MaterialStateProperty.all(6),
-                      thumbVisibility: MaterialStateProperty.all(true),
-                      thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                      ),
+                      offset: const Offset(0, -5),
+                      scrollbarTheme: ScrollbarThemeData(
+                        radius: const Radius.circular(40),
+                        thickness: MaterialStateProperty.all(6),
+                        thumbVisibility: MaterialStateProperty.all(true),
+                        thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20,),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  MaterialButton(
+              const SizedBox(height: 20,),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MaterialButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                    color: Colors.grey,
-                    child: const Text(
+                      color: Colors.grey,
+                      child: const Text(
                         'Cancelar',
-                      style: TextStyle(
-                        color: Colors.black
+                        style: TextStyle(
+                            color: Colors.black
+                        ),
                       ),
                     ),
-                  ),
-                  MaterialButton(
-                    onPressed: () {
-                      _guardarDatos(context).then((cargaCorrecta) {
-                        if(cargaCorrecta && widget.tipo=='ingreso') {
-                          // Si la carga se realizo se recarga la vista de ingresos
-                          Navigator.pushAndRemoveUntil(
+                    MaterialButton(
+                      onPressed: () {
+                        _guardarDatos(context).then((cargaCorrecta) {
+                          if(cargaCorrecta && widget.tipo=='ingreso') {
+                            // Si la carga se realizo se recarga la vista de ingresos
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
-                              (Route<dynamic> route) => false,
-                          );
-                        } else if(cargaCorrecta && widget.tipo=='egreso') {
-                          // Si la carga se realizo se recarga la vista de egresos
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
-                                (Route<dynamic> route) => false,
-                          );
-                        }
-                      });
-                    },
-                    color: const Color(0xFF02013C),
-                    child: const Text(
-                      'Agregar',
-                      style: TextStyle(
-                        color: Colors.white,
+                                  (Route<dynamic> route) => false,
+                            );
+                          } else if(cargaCorrecta && widget.tipo=='egreso') {
+                            // Si la carga se realizo se recarga la vista de egresos
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                  (Route<dynamic> route) => false,
+                            );
+                          }
+                        });
+                      },
+                      color: const Color(0xFF02013C),
+                      child: const Text(
+                        'Agregar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -458,242 +460,244 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10)
       ),
-      child: Container(
-        //height: MediaQuery.of(context).size.height,// Altura de la pantalla
-        width: MediaQuery.of(context).size.width, //Ancho de la pantalla
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              child: Text(
-                widget.tipo=='ingreso' ? 'Editar ingreso' : 'Editar egreso',
-                style: const TextStyle(
-                  fontSize: 30.0,
-                ),
-                softWrap: true,
-              ),
-            ),
-            const SizedBox(height: 20,),
-            Container( // Nombre del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _nombreTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container( // Monto del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _montoTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container( // Descripcion del ingreso
-              child: TextField(
-                readOnly: false,
-                controller: _descripcionTEC,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Container(
-              height: 60.0,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black54,
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.white,
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton2<String>(
-                  isExpanded: true,
-                  hint: Text(
-                    ' ',
-                    style: TextStyle(
-                        color: Theme.of(context).hintColor
-                    ),
+      child: SingleChildScrollView(
+        child: Container(
+          //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: Text(
+                  widget.tipo=='ingreso' ? 'Editar ingreso' : 'Editar egreso',
+                  style: const TextStyle(
+                    fontSize: 30.0,
                   ),
-                  items: _obtenerCategorias(widget.listaCategorias)
-                      .map((String item) => DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(
-                      item[0].toUpperCase()+item.substring(1),
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ))
-                      .toList(),
-                  value: _categoriaSeleccionada,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _categoriaSeleccionada = value;
-                    });
-                  },
-                  buttonStyleData: const ButtonStyleData(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    height: 40,
-                    width: double.maxFinite,
-                  ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 40,
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    maxHeight: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white,
-                    ),
-                    offset: const Offset(0, -5),
-                    scrollbarTheme: ScrollbarThemeData(
-                      radius: const Radius.circular(40),
-                      thickness: MaterialStateProperty.all(6),
-                      thumbVisibility: MaterialStateProperty.all(true),
-                      thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
-                    ),
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20,),
+              Container( // Nombre del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _nombreTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Nombre del ingreso' : 'Nombre del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20,),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  MaterialButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    color: Colors.grey,
-                    child: const Text(
-                      'Cancelar',
+              const SizedBox(height: 10,),
+              Container( // Monto del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _montoTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Monto del ingreso' : 'Monto del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10,),
+              Container( // Descripcion del ingreso
+                child: TextField(
+                  readOnly: false,
+                  controller: _descripcionTEC,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: widget.tipo=='ingreso' ? 'Descripcion del ingreso' : 'Descripcion del egreso',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10,),
+              Container(
+                height: 60.0,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.black54,
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.white,
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    hint: Text(
+                      ' ',
                       style: TextStyle(
-                          color: Colors.black
+                          color: Theme.of(context).hintColor
+                      ),
+                    ),
+                    items: _obtenerCategorias(widget.listaCategorias)
+                        .map((String item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item[0].toUpperCase()+item.substring(1),
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ))
+                        .toList(),
+                    value: _categoriaSeleccionada,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _categoriaSeleccionada = value;
+                      });
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      height: 40,
+                      width: double.maxFinite,
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                      ),
+                      offset: const Offset(0, -5),
+                      scrollbarTheme: ScrollbarThemeData(
+                        radius: const Radius.circular(40),
+                        thickness: MaterialStateProperty.all(6),
+                        thumbVisibility: MaterialStateProperty.all(true),
+                        thumbColor: MaterialStateProperty.all(const Color(0xFF02013C)),
                       ),
                     ),
                   ),
-                  MaterialButton(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text(
-                                "Alerta",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold
+                ),
+              ),
+              const SizedBox(height: 20,),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MaterialButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.grey,
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                            color: Colors.black
+                        ),
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text(
+                                  "Alerta",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold
+                                  ),
                                 ),
-                              ),
-                              content: const Text(
-                                "¿Confirmar los cambios?",
-                                softWrap: true,
-                              ),
-                              actions: [
-                                TextButton(
+                                content: const Text(
+                                  "¿Confirmar los cambios?",
+                                  softWrap: true,
+                                ),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text(
+                                        "Cancelar",
+                                        style: TextStyle(
+                                            color: Colors.black
+                                        ),
+                                      )
+                                  ),
+                                  TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
-                                    },
-                                    child: const Text(
-                                      "Cancelar",
-                                      style: TextStyle(
-                                        color: Colors.black
-                                      ),
-                                    )
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _guardarDatos(context).then((cargaCorrecta) {
-                                      if(cargaCorrecta && widget.tipo=='ingreso') {
-                                        // Si la carga se realizo se recarga la vista de ingresos
-                                        Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
-                                              (Route<dynamic> route) => false,
-                                        );
-                                      } else if(cargaCorrecta && widget.tipo=='egreso') {
-                                        // Si la carga se realizo se recarga la vista de egresos
-                                        Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
-                                              (Route<dynamic> route) => false,
-                                        );
-                                      } else {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                  "Error",
-                                                  style: TextStyle(
-                                                      fontWeight: FontWeight.bold
-                                                  ),
-                                                ),
-                                                content: Text(
-                                                    _errorMonto ? 'Valor del monto incorrecto.' : "No se pudo realizar la actualizacion del elemento."
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    style: TextButton.styleFrom(
-                                                      foregroundColor: const Color(0xFF02013C),
+                                      _guardarDatos(context).then((cargaCorrecta) {
+                                        if(cargaCorrecta && widget.tipo=='ingreso') {
+                                          // Si la carga se realizo se recarga la vista de ingresos
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                                (Route<dynamic> route) => false,
+                                          );
+                                        } else if(cargaCorrecta && widget.tipo=='egreso') {
+                                          // Si la carga se realizo se recarga la vista de egresos
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                                (Route<dynamic> route) => false,
+                                          );
+                                        } else {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                    "Error",
+                                                    style: TextStyle(
+                                                        fontWeight: FontWeight.bold
                                                     ),
-                                                    child: const Text("Aceptar"),
-                                                  )
-                                                ],
-                                              );
-                                            }
-                                        );
-                                      }
-                                    });
-                                  },
+                                                  ),
+                                                  content: Text(
+                                                      _errorMonto ? 'Valor del monto incorrecto.' : "No se pudo realizar la actualizacion del elemento."
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      style: TextButton.styleFrom(
+                                                        foregroundColor: const Color(0xFF02013C),
+                                                      ),
+                                                      child: const Text("Aceptar"),
+                                                    )
+                                                  ],
+                                                );
+                                              }
+                                          );
+                                        }
+                                      });
+                                    },
                                     child: const Text(
                                         "Confirmar"
                                     ),
-                                ),
-                              ],
-                            );
-                          }
-                      );
-                    },
-                    color: const Color(0xFF02013C),
-                    child: const Text(
-                      'Guardar',
-                      style: TextStyle(
-                        color: Colors.white,
+                                  ),
+                                ],
+                              );
+                            }
+                        );
+                      },
+                      color: const Color(0xFF02013C),
+                      child: const Text(
+                        'Guardar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -758,325 +762,327 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10)
       ),
-      child: Container(
-        width: MediaQuery.of(context).size.width, //Ancho de la pantalla
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Column(
-              // Titulo de la ventana
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  widget.tipo=='ingreso' ? 'Detalles del ingreso' : 'Detalles del egreso',
-                  style: const TextStyle(
-                    fontSize: 30.0,
-                  ),
-                  softWrap: true,
-                ),
-              ],
-            ),
-
-            Column( // Contenido de la ventana
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const SizedBox(height: 20,),
-                Container( // Nombre del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(6.0),
-                      topRight: Radius.circular(6.0),
+      child: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Column(
+                // Titulo de la ventana
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    widget.tipo=='ingreso' ? 'Detalles del ingreso' : 'Detalles del egreso',
+                    style: const TextStyle(
+                      fontSize: 30.0,
                     ),
+                    softWrap: true,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                          'Nombre:'
-                      ),
-                      Text(
-                          widget.elemento['nombre'][0].toUpperCase()+widget.elemento['nombre'].substring(1),
-                        softWrap: true,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2,),
-                Container( // Monto del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                      color: Colors.white
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                          'Monto:'
-                      ),
-                      Text(
-                          widget.montoFormateado,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2,),
-                Container( // Porcentaje del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                      color: Colors.white
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                          widget.tipo=='ingreso' ? 'Porcentaje correspodiente al total de ingresos:' : 'Porcentaje correspodiente al total de egresos',
-                      softWrap: true,
-                      ),
-                      Text(
-                          '${widget.porcentaje.toStringAsFixed(2)}%',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2,),
-                Container( // Descripcion del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                      color: Colors.white
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                          'Descripcion:'
-                      ),
-                      Text(
-                          widget.elemento['descripcion'][0].toUpperCase()+widget.elemento['descripcion'].substring(1),
-                        softWrap: true,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2,),
-                Container( // Categoria del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                          'Categoria:'
-                      ),
-                      Text(
-                          widget.categoriaElemento[0].toUpperCase()+widget.categoriaElemento.substring(1),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2,),
-                Container( // Fecha de registro del ingreso
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(6.0),
-                      bottomRight: Radius.circular(6.0),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                          'Fecha de registro:'
-                      ),
-                      Text(
-                        _formatearFecha(widget.elemento['fecha_registro']),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20,),
-              ],
-            ),
+                ],
+              ),
 
-            Column( // Botones
-              children: <Widget>[
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+              Column( // Contenido de la ventana
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 20,),
+                  Container( // Nombre del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(6.0),
+                        topRight: Radius.circular(6.0),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        MaterialButton(
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text(
+                        const Text(
+                            'Nombre:'
+                        ),
+                        Text(
+                          widget.elemento['nombre'][0].toUpperCase()+widget.elemento['nombre'].substring(1),
+                          softWrap: true,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+                  Container( // Monto del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                            'Monto:'
+                        ),
+                        Text(
+                          widget.montoFormateado,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+                  Container( // Porcentaje del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          widget.tipo=='ingreso' ? 'Porcentaje correspodiente al total de ingresos:' : 'Porcentaje correspodiente al total de egresos',
+                          softWrap: true,
+                        ),
+                        Text(
+                          '${widget.porcentaje.toStringAsFixed(2)}%',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+                  Container( // Descripcion del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                            'Descripcion:'
+                        ),
+                        Text(
+                          widget.elemento['descripcion'][0].toUpperCase()+widget.elemento['descripcion'].substring(1),
+                          softWrap: true,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+                  Container( // Categoria del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                            'Categoria:'
+                        ),
+                        Text(
+                          widget.categoriaElemento[0].toUpperCase()+widget.categoriaElemento.substring(1),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+                  Container( // Fecha de registro del ingreso
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    width: double.maxFinite,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(6.0),
+                        bottomRight: Radius.circular(6.0),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                            'Fecha de registro:'
+                        ),
+                        Text(
+                          _formatearFecha(widget.elemento['fecha_registro']),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20,),
+                ],
+              ),
+
+              Column( // Botones
+                children: <Widget>[
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          MaterialButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text(
                                         "Alerta",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold
+                                        ),
                                       ),
-                                    ),
-                                    content: const Text(
+                                      content: const Text(
                                         "¿Esta seguro que desea eliminar el elemento?",
-                                      softWrap: true,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text(
-                                              "Cancelar",
-                                            style: TextStyle(
-                                              color: Colors.black
-                                            ),
-                                          )
+                                        softWrap: true,
                                       ),
-                                      TextButton(
-                                          onPressed: () {
-                                            _eliminarElemento(widget.tipo, widget.elemento).then((value) {
-                                              if(value && widget.tipo=='ingreso') {
-                                                // Si se realizo la eliminacion se carga la vista de ingresos
-                                                Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
-                                                      (Route<dynamic> route) => false,
-                                                );
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text(
+                                              "Cancelar",
+                                              style: TextStyle(
+                                                  color: Colors.black
+                                              ),
+                                            )
+                                        ),
+                                        TextButton(
+                                            onPressed: () {
+                                              _eliminarElemento(widget.tipo, widget.elemento).then((value) {
+                                                if(value && widget.tipo=='ingreso') {
+                                                  // Si se realizo la eliminacion se carga la vista de ingresos
+                                                  Navigator.pushAndRemoveUntil(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                                        (Route<dynamic> route) => false,
+                                                  );
 
-                                              } else if(value && widget.tipo=='egreso') {
-                                                // Si se realizo la eliminacion se carga la vista de egresos
-                                                Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
-                                                      (Route<dynamic> route) => false,
-                                                );
+                                                } else if(value && widget.tipo=='egreso') {
+                                                  // Si se realizo la eliminacion se carga la vista de egresos
+                                                  Navigator.pushAndRemoveUntil(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                                        (Route<dynamic> route) => false,
+                                                  );
 
-                                              } else {
-                                                // No se realizo la operacion y se muestra cuadro de dialogo
-                                                Navigator.pop(context);
-                                                showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: const Text("Ocurrio un error al eliminar el elemento."),
-                                                        actions: [
-                                                          TextButton(
+                                                } else {
+                                                  // No se realizo la operacion y se muestra cuadro de dialogo
+                                                  Navigator.pop(context);
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                          title: const Text("Ocurrio un error al eliminar el elemento."),
+                                                          actions: [
+                                                            TextButton(
                                                               onPressed: () => Navigator.of(context).pop(),
                                                               child: const Text("Aceptar"),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    }
-                                                );
-                                              }
-                                            });
-                                          },
-                                          child: Text("Confirmar")
-                                      ),
-                                    ],
-                                  );
-                                }
-                            );
-                          },
-                          color: Colors.red,
-                          child: const Text(
-                            'Eliminar',
-                            style: TextStyle(
-                                color: Colors.white
+                                                            ),
+                                                          ],
+                                                        );
+                                                      }
+                                                  );
+                                                }
+                                              });
+                                            },
+                                            child: Text("Confirmar")
+                                        ),
+                                      ],
+                                    );
+                                  }
+                              );
+                            },
+                            color: Colors.red,
+                            child: const Text(
+                              'Eliminar',
+                              style: TextStyle(
+                                  color: Colors.white
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12,),
-                        MaterialButton(
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CuadroDialogoEditar(
-                                      tipo: widget.tipo,
-                                      listaCategorias: widget.listaCategorias,
-                                      usuario: widget.usuario,
-                                      elemento: widget.elemento,
-                                      categoriaElemento: widget.categoriaElemento
-                                  );
-                                }
-                            );
-                          },
-                          color: const Color(0xFF02013C),
-                          child: const Text(
-                            'Editar',
-                            style: TextStyle(
-                              color: Colors.white,
+                          const SizedBox(width: 12,),
+                          MaterialButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CuadroDialogoEditar(
+                                        tipo: widget.tipo,
+                                        listaCategorias: widget.listaCategorias,
+                                        usuario: widget.usuario,
+                                        elemento: widget.elemento,
+                                        categoriaElemento: widget.categoriaElemento
+                                    );
+                                  }
+                              );
+                            },
+                            color: const Color(0xFF02013C),
+                            child: const Text(
+                              'Editar',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        MaterialButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          color: Colors.grey,
-                          child: const Text(
-                            'Regresar',
-                            style: TextStyle(
-                              color: Colors.white,
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          MaterialButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            color: Colors.grey,
+                            child: const Text(
+                              'Regresar',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
 
-                  ],
-                )
-              ],
-            )
+                    ],
+                  )
+                ],
+              )
 
-          ],
+            ],
+          ),
         ),
       ),
     );

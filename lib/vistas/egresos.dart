@@ -89,7 +89,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
     if(_egresosTodos.isNotEmpty) {
       // Widgets de la pestaña todos
       listaWidgets.add(
-        BotonIngresoEgreso(
+        BotonIngresoEgreso2(
             tipo: 'egreso',
             listaElementos: _egresosTodos,
             totalIngresos: _totalEgresos,
@@ -110,7 +110,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
         // Verificar si hay elementos en la categoria
         if(egresosCategoria.isNotEmpty) { // Si la categoria tiene elementos para generar widgets
           listaWidgets.add(
-            BotonIngresoEgreso(
+            BotonIngresoEgreso2(
               tipo: 'egreso',
               listaElementos: egresosCategoria,
               totalIngresos: _totalEgresos,

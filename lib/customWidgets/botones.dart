@@ -280,11 +280,11 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
               ),
               // Barra porcentaje del total
               BarraProgreso(
-                  labelInicio: formatearCantidad(0.0),
-                  labelFinal: formatearCantidad(widget.totalIngresos.toDouble()),
-                  porcentajeProgreso: _porcentajeCategoria,
-                  colorBarraPrincipal: Colors.indigo,
-                  colorBarraSecundario: widget.tipo=='ingreso' ? Colors.green : Colors.red,
+                labelInicio: formatearCantidad(0.0),
+                labelFinal: formatearCantidad(widget.totalIngresos.toDouble()),
+                porcentajeProgreso: _porcentajeCategoria,
+                colorBarraPrincipal: Colors.indigo,
+                colorBarraSecundario: widget.tipo=='ingreso' ? Colors.green : Colors.red,
               ),
             ],
           ),
@@ -445,7 +445,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
 
 
 
-// Widget con el contenido de cada pestaña
+// Es lo mismo que BotonIngresoEgreso pero en este cambia el ordenamiento de la BarraProgreso y los botones de ordenamiento para poder hacer la vista con scroll
 class BotonIngresoEgreso2 extends StatefulWidget {
   const BotonIngresoEgreso2({super.key,
     required this.tipo,
@@ -531,10 +531,61 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
     // ordenar lista de elementos antes de construir los widgets
     _ordenarListaElementos();
 
-    int aux = 0;
+    // Mostrar total de ingresos por categoria (no se muestra en la pestaña 'todos')
+    if(widget.mostrarTotalIngresosCategoria) {
+      botones.add(
+        Column(
+          children: [
+            // Texto de total de la categoria
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const EtiquetaPorcentaje(
+                  texto: "Total de esta categoria:",
+                  colorFondo: Color(0xffdae9ff),
+                  textStyle: TextStyle(
+                    color: Colors.indigo,
+                  ),
+                  /*
+                  colorTexto: Colors.green,
+                  textSize: 20.0,
+                  fontWeight: FontWeight.bold,
+
+                   */
+                ),
+                EtiquetaPorcentaje(
+                  texto: "${formatearCantidad(_sumaTotalCategoria)} (${_porcentajeCategoria.toStringAsFixed(2)}%)",
+                  colorFondo: const Color(0xffdae9ff),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo,
+                  ),
+                  /*
+                  colorTexto: Colors.green,
+                  textSize: 20.0,
+                  fontWeight: FontWeight.bold,
+
+                   */
+                ),
+              ],
+            ),
+            // Barra porcentaje del total
+            BarraProgreso(
+              labelInicio: formatearCantidad(0.0),
+              labelFinal: formatearCantidad(widget.totalIngresos.toDouble()),
+              porcentajeProgreso: _porcentajeCategoria,
+              colorBarraPrincipal: Colors.indigo,
+              colorBarraSecundario: widget.tipo=='ingreso' ? Colors.green : Colors.red,
+            ),
+          ],
+        ),
+      );
+    }
+
+
+
     // Recorrer todos los elementos de la BD y crear un boton para cada elemento
     for (var elemento in _listaElementosMutable) {
-      /*
       double porcentaje = (elemento['monto']*100.0) / widget.totalIngresos.toDouble(); // Se utiliza double en lugar de decimal para el porcentaje por temas de precision en el punto decimal que no puede manejar Decimal
       String categoria = widget.tipo=='ingreso' ? obtenerCategoria(elemento['fk_id_categoria_ingreso']) : obtenerCategoria(elemento['fk_id_categoria_egreso']);
       String montoFormateado = formatearCantidad(elemento['monto']);
@@ -662,11 +713,6 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
             )
         ),
       );
-      */
-      aux += 1;
-       botones.add(
-         Text("Elemento $aux")
-       );
     }
     setState(() {});
   }
@@ -687,53 +733,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
   Widget build(BuildContext context) {
     return Column( // Esto es lo que regresa el widget
       children: [
-        // Mostrar total de ingresos por categoria (no se muestra en la pestaña 'todos')
-        if(widget.mostrarTotalIngresosCategoria)
-          Column(
-            children: [
-              // Texto de total de la categoria
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const EtiquetaPorcentaje(
-                    texto: "Total de esta categoria:",
-                    colorFondo: Color(0xffdae9ff),
-                    textStyle: TextStyle(
-                      color: Colors.indigo,
-                    ),
-                    /*
-                  colorTexto: Colors.green,
-                  textSize: 20.0,
-                  fontWeight: FontWeight.bold,
 
-                   */
-                  ),
-                  EtiquetaPorcentaje(
-                    texto: "${formatearCantidad(_sumaTotalCategoria)} (${_porcentajeCategoria.toStringAsFixed(2)}%)",
-                    colorFondo: const Color(0xffdae9ff),
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo,
-                    ),
-                    /*
-                  colorTexto: Colors.green,
-                  textSize: 20.0,
-                  fontWeight: FontWeight.bold,
-
-                   */
-                  ),
-                ],
-              ),
-              // Barra porcentaje del total
-              BarraProgreso(
-                labelInicio: formatearCantidad(0.0),
-                labelFinal: formatearCantidad(widget.totalIngresos.toDouble()),
-                porcentajeProgreso: _porcentajeCategoria,
-                colorBarraPrincipal: Colors.indigo,
-                colorBarraSecundario: widget.tipo=='ingreso' ? Colors.green : Colors.red,
-              ),
-            ],
-          ),
 
 
 

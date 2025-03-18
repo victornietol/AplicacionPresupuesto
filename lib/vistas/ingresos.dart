@@ -93,7 +93,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
     // Widgets de la pestaña todos
     listaWidgets.add(
-      BotonIngresoEgreso(
+      BotonIngresoEgreso2(
         tipo: 'ingreso',
         listaElementos: _ingresosTodos,
         totalIngresos: _totalIngresos,
@@ -111,7 +111,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
       ).toList();
 
       listaWidgets.add(
-        BotonIngresoEgreso(
+        BotonIngresoEgreso2(
             tipo: 'ingreso',
             listaElementos: ingresosCategoria,
             totalIngresos: _totalIngresos,
