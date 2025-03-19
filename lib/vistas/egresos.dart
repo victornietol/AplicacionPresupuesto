@@ -101,36 +101,22 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
 
       // Widgets de las pestañas de cada categoria
       for(var categoria in _categorias) {
-
         // filtrar los elementos de cada categoria
         List<Map<String, dynamic>> egresosCategoria = _egresosTodos.where(
                 (element) => element['fk_id_categoria_egreso']==categoria['id_categoria']
         ).toList();
 
-        // Verificar si hay elementos en la categoria
-        if(egresosCategoria.isNotEmpty) { // Si la categoria tiene elementos para generar widgets
-          listaWidgets.add(
-            BotonIngresoEgreso2(
-              tipo: 'egreso',
-              listaElementos: egresosCategoria,
-              totalIngresos: _totalEgresos,
-              listaCategorias: _categorias,
-              usuario: widget.usuario,
-              mostrarTotalIngresosCategoria: true,
-            ),
-          );
-        } else {  // Si no hay elementos en la categoria
-          listaWidgets.add(
-              const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text("Aun no hay egresos registrados en esta categoria.")
-                ],
-              )
-          );
-        }
-
+        listaWidgets.add(
+          BotonIngresoEgreso2(
+            tipo: 'egreso',
+            listaElementos: egresosCategoria,
+            totalIngresos: _totalEgresos,
+            listaCategorias: _categorias,
+            usuario: widget.usuario,
+            mostrarTotalIngresosCategoria: true,
+            nombreCategoria: categoria['nombre'],
+          ),
+        );
       }
 
     } else {
@@ -306,29 +292,59 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
               )
           ),
 
-          MaterialButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CuadroDialogoAgregar(
-                        tipo: 'egreso',
-                        listaCategorias: _categorias,
-                        usuario: widget.usuario,
-                      );
-                    }
-                );
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_rounded),
-                  Text(
-                      "Agregar egreso"
-                  ),
-                ],
-              )
-          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // Boton Agregar egreso
+              MaterialButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CuadroDialogoAgregar(
+                            tipo: 'egreso',
+                            listaCategorias: _categorias,
+                            usuario: widget.usuario,
+                          );
+                        }
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_rounded),
+                      Text(
+                          "Agregar egreso"
+                      ),
+                    ],
+                  )
+              ),
+              // Boton Agregar categoria
+              MaterialButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CuadroDialogoAgregarCategoria(
+                              tipo: 'egreso',
+                              usuario: widget.usuario
+                          );
+                        }
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_rounded),
+                      Text(
+                          "Agregar categoria"
+                      ),
+                    ],
+                  )
+              ),
+            ],
+          )
+
 
 
         ],

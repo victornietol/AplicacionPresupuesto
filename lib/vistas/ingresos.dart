@@ -118,6 +118,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
             listaCategorias: _categorias,
             usuario: widget.usuario,
             mostrarTotalIngresosCategoria: true,
+          nombreCategoria: categoria['nombre'],
         ),
       );
     }
@@ -291,30 +292,57 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
               )
           ),
 
-          Container(
-            child: MaterialButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return CuadroDialogoAgregar(
-                          tipo: 'ingreso',
-                          listaCategorias: _categorias,
-                          usuario: widget.usuario,
-                        );
-                      }
-                  );
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_rounded),
-                    Text(
-                        "Agregar ingreso"
-                    ),
-                  ],
-                )
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+             children: [
+               // Boton Agregar ingreso
+               MaterialButton(
+                   onPressed: () {
+                     showDialog(
+                         context: context,
+                         builder: (BuildContext context) {
+                           return CuadroDialogoAgregar(
+                             tipo: 'ingreso',
+                             listaCategorias: _categorias,
+                             usuario: widget.usuario,
+                           );
+                         }
+                     );
+                   },
+                   child: const Row(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       Icon(Icons.add_rounded),
+                       Text(
+                           "Agregar ingreso"
+                       ),
+                     ],
+                   )
+               ),
+               // Boton Agregar categoria
+               MaterialButton(
+                   onPressed: () {
+                     showDialog(
+                         context: context,
+                         builder: (BuildContext context) {
+                           return CuadroDialogoAgregarCategoria(
+                               tipo: 'ingreso',
+                               usuario: widget.usuario
+                           );
+                         }
+                     );
+                   },
+                   child: const Row(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       Icon(Icons.add_rounded),
+                       Text(
+                           "Agregar categoria"
+                       ),
+                     ],
+                   )
+               ),
+             ],
           ),
 
 

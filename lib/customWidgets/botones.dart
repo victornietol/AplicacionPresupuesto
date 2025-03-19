@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
+import 'package:calculadora_presupuesto/navegador.dart';
+import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:calculadora_presupuesto/customWidgets/otrosWidgets.dart';
 
@@ -453,7 +455,8 @@ class BotonIngresoEgreso2 extends StatefulWidget {
     required this.totalIngresos,
     required this.listaCategorias,
     required this.usuario,
-    required this.mostrarTotalIngresosCategoria
+    required this.mostrarTotalIngresosCategoria,
+    this.nombreCategoria,
   });
   final String tipo; // Indica si es Ingreso o Egreso
   final List<Map<String, dynamic>> listaElementos; // Datos completos de ingresos o egresos
@@ -461,6 +464,7 @@ class BotonIngresoEgreso2 extends StatefulWidget {
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
   final String usuario;
   final bool mostrarTotalIngresosCategoria;
+  final String? nombreCategoria;
 
 
   @override
@@ -495,6 +499,18 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
           (element) => element['id_categoria']==fk_id,
       orElse: () => {'nombre': 'Sin categoria'},
     )['nombre'];
+  }
+
+  // Eliminar una categoria
+  Future<bool> _eliminarCategoria(String nombreCategoria, String tipo) async {
+    switch (tipo) {
+      case 'ingreso':
+        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
+      case 'egreso':
+        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
+      default:
+        return false;
+    }
   }
 
   // Formatear cantidad de dinero
@@ -536,7 +552,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
       botones.add(
         Column(
           children: [
-            // Texto de total de la categoria
+            // Texto de total de la categoria y boton para eliminar categoria
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -566,6 +582,79 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                   fontWeight: FontWeight.bold,
 
                    */
+                ),
+                MaterialButton(
+                  minWidth: 20.0,
+                  height: 30.0,
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          // Pedir confirmacion para elimar
+                          return AlertDialog(
+                            content: const Text('¿Esta seguro de eliminar esta categoria?'),
+                            actions: [
+                              MaterialButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancelar'),
+                              ),
+                              // Boton para confirmar la eliminacion
+                              MaterialButton(
+                                  onPressed: () {
+                                    _eliminarCategoria(widget.nombreCategoria ?? '', widget.tipo).then((value) {
+                                      if(value && widget.tipo=='ingreso') {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                              (Route<dynamic> route) => false,
+                                        );
+                                      } else if(value && widget.tipo=='egreso') {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                              (Route<dynamic> route) => false,
+                                        );
+                                      } else {
+                                        // No se realizo la carga
+                                        Navigator.of(context).pop();
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                content: const Text('Error al eliminar.'),
+                                                actions: [
+                                                  MaterialButton(
+                                                      onPressed: () => Navigator.of(context).pop(),
+                                                    child: const Text('Aceptar'),
+                                                  ),
+                                                ],
+                                              );
+                                            }
+                                        );
+                                      }
+                                    });
+
+
+                                  },
+                                child: const Text(
+                                    'Confirmar',
+                                  style: TextStyle(
+                                    color: Colors.indigo
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                    );
+                  },
+                  child: const Icon(
+                    Icons.delete_forever_rounded,
+                    size: 20,
+                    color: Colors.red,
+                  ),
                 ),
               ],
             ),

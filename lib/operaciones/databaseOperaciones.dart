@@ -239,6 +239,42 @@ class DataBaseOperaciones {
     }
   }
 
+  // Insertar categoria
+  Future<bool> insertarCategoria(String nombre, String tipo) async {
+    final db = await database;
+    int insercion = 0;
+
+    if(tipo=='ingreso') {
+      insercion = await db.insert(
+          'categoria_ingreso', // tabla
+          {'nombre': nombre} // campo
+      );
+    } else if(tipo=='egreso') {
+      insercion = await db.insert(
+          'categoria_egreso', // tabla
+          {'nombre': nombre} // campo
+      );
+    } else {
+      return false; // No se realizo insercion
+    }
+    return insercion>0 ? true : false;
+  }
+
+  // Eliminar categoria
+  Future<bool> eliminarCategoria(String nombre, String tipo) async {
+    final db = await database;
+    int eliminacion = 0;
+
+    if(tipo=='ingreso') {
+      eliminacion = await db.delete('categoria_ingreso', where: 'nombre = ?', whereArgs: [nombre]);
+    } else if(tipo=='egreso') {
+      eliminacion = await db.delete('categoria_egreso', where: 'nombre = ?', whereArgs: [nombre]);
+    } else {
+      return false; // No se realizo insercion
+    }
+    return eliminacion>0 ? true : false;
+  }
+
   // Obtener lista ingresos del usuario
   Future<List<Map<String, dynamic>>> obtenerIngresosTodos(String usuario) async {
     final db = await database;

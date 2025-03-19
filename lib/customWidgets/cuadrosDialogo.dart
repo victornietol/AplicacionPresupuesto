@@ -43,7 +43,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
     if(widget.tipo=='ingreso') {  // Insertar ingreso
       try {
         // Verificar que no sean campos vacios
-        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+        if(_nombreTEC.text.trim().isEmpty||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text.isEmpty||_descripcionTEC.text.trim().isEmpty) {
           throw Exception("Campo vacio");
         }
         datos['nombre']=_nombreTEC.text;
@@ -100,7 +100,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
 
     } else if(widget.tipo=='egreso') {  // Insertar egreso
       try {
-        if(_nombreTEC.text==''||_nombreTEC.text==' '||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text==''||_descripcionTEC.text==' '||_descripcionTEC.text.isEmpty) {
+        if(_nombreTEC.text.trim().isEmpty||_nombreTEC.text.isEmpty||_categoriaSeleccionada==null||_descripcionTEC.text.trim().isEmpty||_descripcionTEC.text.isEmpty) {
           throw Exception("Campo vacio");
         }
         datos['nombre']=_nombreTEC.text;
@@ -1081,6 +1081,170 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                 ],
               )
 
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+// Cuadro de de dialogo para agregar una categoria
+class CuadroDialogoAgregarCategoria extends StatefulWidget {
+  const CuadroDialogoAgregarCategoria({super.key,
+    required this.tipo,
+    required this.usuario,
+  });
+  final String tipo;
+  final String usuario;
+
+  @override
+  State<CuadroDialogoAgregarCategoria> createState() => _CuadroDialogoAgregarCategoriaState();
+}
+
+class _CuadroDialogoAgregarCategoriaState extends State<CuadroDialogoAgregarCategoria> {
+  TextEditingController _nombreTEC = TextEditingController();
+  String? _mensajeErrorGuardar;
+
+
+  Future<bool> _guardarDatos(String nombreCategoria, String tipo) async {
+    if(nombreCategoria.isEmpty || nombreCategoria.trim().isEmpty) {
+      _mensajeErrorGuardar = "Campo vacio.";
+      return false;
+    } else {
+      try {
+        switch (tipo) {
+          case 'ingreso':
+            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo);
+          case 'egreso':
+            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo);
+          default:
+            return false; // No se inserto
+        }
+      } catch (e) {
+        if(e.toString().contains('UNIQUE constraint failed')) {
+          _mensajeErrorGuardar = 'La categoria ya existe.';
+          return false;
+        } else {
+          _mensajeErrorGuardar = 'No se pudo realizar la carga.';
+          return false;
+        }
+      }
+    }
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: SingleChildScrollView(
+        child: Container(
+          //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: Text(
+                  widget.tipo=='ingreso' ? 'Nueva categoria de ingresos' : 'Nueva categoria de egresos',
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                  ),
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20,),
+              Container( // Nombre
+                child: TextField(
+                  readOnly: false,
+                  controller: _nombreTEC,
+                  decoration: const InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Nombre de la categoria',
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20,),
+
+              // Botones
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MaterialButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.grey,
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                            color: Colors.black
+                        ),
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        _guardarDatos(_nombreTEC.text, widget.tipo).then((cargaCorrecta) {
+                          if(cargaCorrecta && widget.tipo=='ingreso') {
+                            // Si la carga se realizo se recarga la vista de ingresos
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                  (Route<dynamic> route) => false,
+                            );
+                          } else if(cargaCorrecta && widget.tipo=='egreso') {
+                            // Si la carga se realizo se recarga la vista de egresos
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                  (Route<dynamic> route) => false,
+                            );
+                          } else {
+                            // Falla la carga
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Error'),
+                                    content: Text(_mensajeErrorGuardar ?? 'Ocurrio un error.'),
+                                    actions: [
+                                      MaterialButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('Aceptar'),
+                                      ),
+                                    ],
+                                  );
+                                }
+                            );
+                          }
+                        });
+                      },
+                      color: const Color(0xFF02013C),
+                      child: const Text(
+                        'Agregar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
