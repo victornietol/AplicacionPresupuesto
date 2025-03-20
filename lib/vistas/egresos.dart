@@ -86,61 +86,35 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
     List<Widget> listaWidgets = [];
 
     // Si hay elementos para crear los widgets
-    if(_egresosTodos.isNotEmpty) {
-      // Widgets de la pestaña todos
+    listaWidgets.add(
+      BotonIngresoEgreso2(
+          tipo: 'egreso',
+          listaElementos: _egresosTodos,
+          totalIngresos: _totalEgresos,
+          listaCategorias: _categorias,
+          usuario: widget.usuario,
+          mostrarTotalIngresosCategoria: false
+      ),
+    );
+
+    // Widgets de las pestañas de cada categoria
+    for(var categoria in _categorias) {
+      // filtrar los elementos de cada categoria
+      List<Map<String, dynamic>> egresosCategoria = _egresosTodos.where(
+              (element) => element['fk_id_categoria_egreso']==categoria['id_categoria']
+      ).toList();
+
       listaWidgets.add(
         BotonIngresoEgreso2(
-            tipo: 'egreso',
-            listaElementos: _egresosTodos,
-            totalIngresos: _totalEgresos,
-            listaCategorias: _categorias,
-            usuario: widget.usuario,
-            mostrarTotalIngresosCategoria: false
+          tipo: 'egreso',
+          listaElementos: egresosCategoria,
+          totalIngresos: _totalEgresos,
+          listaCategorias: _categorias,
+          usuario: widget.usuario,
+          mostrarTotalIngresosCategoria: true,
+          nombreCategoria: categoria['nombre'],
         ),
       );
-
-      // Widgets de las pestañas de cada categoria
-      for(var categoria in _categorias) {
-        // filtrar los elementos de cada categoria
-        List<Map<String, dynamic>> egresosCategoria = _egresosTodos.where(
-                (element) => element['fk_id_categoria_egreso']==categoria['id_categoria']
-        ).toList();
-
-        listaWidgets.add(
-          BotonIngresoEgreso2(
-            tipo: 'egreso',
-            listaElementos: egresosCategoria,
-            totalIngresos: _totalEgresos,
-            listaCategorias: _categorias,
-            usuario: widget.usuario,
-            mostrarTotalIngresosCategoria: true,
-            nombreCategoria: categoria['nombre'],
-          ),
-        );
-      }
-
-    } else {
-      // Si no hay elementos para crear widgets
-      listaWidgets.add(
-        const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text("Aun no hay egresos registrados.")
-          ],
-        )
-      );
-      for(var _ in _categorias) {
-        listaWidgets.add(
-            const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text("Aun no hay egresos registrados en esta categoria.")
-              ],
-            )
-        );
-      }
     }
 
     return listaWidgets;

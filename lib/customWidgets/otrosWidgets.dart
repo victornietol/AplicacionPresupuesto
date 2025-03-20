@@ -110,12 +110,15 @@ class _BarraProgresoState extends State<BarraProgreso> {
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Padding(
-                          padding: EdgeInsets.only(left: (MediaQuery.of(context).size.width - 62) * (widget.porcentajeProgreso / 100)),
+                          padding: EdgeInsets.only(left: (MediaQuery.of(context).size.width - 69) * (widget.porcentajeProgreso / 100)),
                           child: Container(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
                               "${widget.porcentajeProgreso.toStringAsFixed(2)}%",
-
+                              style: TextStyle(
+                                color: Colors.indigo,
+                                fontWeight: FontWeight.bold
+                              ),
                             ),
                           )
                       ),

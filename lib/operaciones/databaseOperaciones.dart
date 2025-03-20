@@ -309,6 +309,38 @@ class DataBaseOperaciones {
     );
   }
 
+  // Obtener top ingresos del usuario indicando cuantos elementos
+  Future<List<Map<String, dynamic>>> obtenerTopIngresos(String usuario, int numElementos) async {
+    final db = await database;
+    final datosUsuario = await obtenerUsuario(usuario);
+
+    if(datosUsuario == null) {
+      // Si el usuario no existe
+      return [];
+    }
+
+    return await db.rawQuery(
+        'SELECT * FROM ingreso WHERE fk_id_usuario = ? ORDER BY monto DESC LIMIT ?',
+      [datosUsuario['id_usuario'], numElementos]
+    );
+  }
+
+  // Obtener top egresos del usuario indicando cuantos elementos
+  Future<List<Map<String, dynamic>>> obtenerTopEgresos(String usuario, int numElementos) async {
+    final db = await database;
+    final datosUsuario = await obtenerUsuario(usuario);
+
+    if(datosUsuario == null) {
+      // Si el usuario no existe
+      return [];
+    }
+
+    return await db.rawQuery(
+        'SELECT * FROM egreso WHERE fk_id_usuario = ? ORDER BY monto DESC LIMIT ?',
+        [datosUsuario['id_usuario'], numElementos]
+    );
+  }
+
   // Obtener lista ingresos del usuario de una categoria
   Future<List<Map<String, dynamic>>> obtenerIngresosCategoria(String usuario, String categoria) async {
     final db = await database;

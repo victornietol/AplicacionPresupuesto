@@ -87,7 +87,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     return formatoDinero.format(monto);
   }
 
-  // Crear contenido de cada pestaña deñ TabBar
+  // Crear contenido de cada pestaña del TabBar
   List<Widget> _crearWidgetsElementos() {
     List<Widget> listaWidgets = [];
 
