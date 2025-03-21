@@ -17,6 +17,7 @@ class Ingresos extends StatefulWidget{
 
 class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin { // Para el rendimiento del tabCntroller
   late TabController _tabController; //  Sincronizar las pestañas
+  late Future<void> _cargaInicial; // Indicar la carga inicial de datos
 
   late List<Map<String, dynamic>> _categorias;
   late Map<String, dynamic> _sumaTotalPorCategoria;
@@ -27,58 +28,48 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
   final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
   double _lineaAncho = 0.0;
 
-  bool _cargandoCategorias = true; // Controlar la carga de los datos
-  bool _cargandoTotal = true;
-  bool _cargandoIngresosTodos = true;
-
-  //List<Widget> _listaWidgets = []; // Lista con el cuerpo de cada pestaña del TabBar
-
 
 
   @override
   void initState() {
     super.initState();
-
-    // Obtener mi lista de categorias de ingresos para el tabController
-    DataBaseOperaciones().obtenerCategorias("ingreso").then((listaCat) {
-      setState(() {
-        _categorias = listaCat;
-        _tabController = TabController(length: listaCat.length+1, vsync: this);
-
-        // Obtener suma del monto total por categoria
-        _obtenerSumaTotalPorCategorias(listaCat).then((value) {
-          _sumaTotalPorCategoria = value;
-        });
-
-        _cargandoCategorias = false; // datos cargados
-      });
-    });
-
-    // Obtener la suma de los ingresos del usuario
-    DataBaseOperaciones().sumarIngresosTodos(widget.usuario).then((value) {
-      setState(() {
-        _totalIngresosText = '+${value.toString()}';
-        _totalIngresos = value;
-        _cargandoTotal = false;
-      });
-    });
-
-    // Obtener todos los datos de ingresos
-    DataBaseOperaciones().obtenerIngresosTodos(widget.usuario).then((value) {
-      setState(() {
-        _ingresosTodos = value;
-        _cargandoIngresosTodos = false;
-      });
-    });
-
-    // esperar a que se renderice el widget para obtener su tamanio (texto de total ingresos)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _obtenerTamanioTexto();
-    });
-
-
-
+    _cargaInicial = _cargarDatosVista(); // Carga de datos de las funciones asincronas
   }
+
+  // Funcion para ejecutar y esperar el resultado de las funcion asincronas que cargan datos
+  Future<void> _cargarDatosVista() async {
+    await Future.wait([
+      // Funciones de las que se espera un resultado
+      _obtenerCategorias(),
+      _obtenerSumaIngresos(),
+      _obtenerDatosIngresos()
+    ]);
+  }
+
+  // Obtener mi lista de categorias de ingresos para el tabController
+  Future<void> _obtenerCategorias() async {
+    _categorias = await DataBaseOperaciones().obtenerCategorias("ingreso");
+    _tabController = TabController(length: _categorias.length+1, vsync: this);
+
+    // Obtener suma del monto total por categoria
+    _obtenerSumaTotalPorCategorias(_categorias).then((value) {
+      _sumaTotalPorCategoria = value;
+    });
+  }
+
+  // Obtener la suma de los ingresos del usuario
+  Future<void> _obtenerSumaIngresos() async {
+    final value = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario);
+    _totalIngresosText = '+${value.toString()}';
+    _totalIngresos = value;
+  }
+
+  // Obtener todos los datos de ingresos
+  Future<void> _obtenerDatosIngresos() async {
+    _ingresosTodos = await DataBaseOperaciones().obtenerIngresosTodos(widget.usuario);
+  }
+
+
 
   // Formatear cantidad de dinero
   String formatearCantidad(num monto) {
@@ -141,138 +132,145 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    // Se muestra pantalla de carga mientras cargan datos
-    if(_cargandoCategorias || _cargandoTotal || _cargandoIngresosTodos) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF02013C),
-          centerTitle: true,
-          title: Text(
-            widget.title,
-            style: TextStyle(
-              color: Colors.white,
-              letterSpacing: 1.toDouble(),
-            ),
-          ),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    // Si cambio el tamaño del texto del balance
-    if(_lineaAncho==0.0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _obtenerTamanioTexto();
-      });
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF02013C),
-        centerTitle: true,
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            color: Colors.white,
-            letterSpacing: 1.toDouble(),
-          ),
-        ),
-      ),
-
-      body: Column(
-        children: <Widget>[
-
-          // Parte superior (texto suma de ingresos)
-          Container(
-            width: double.infinity, // Se ajusta a toda la pantalla
-            padding: EdgeInsets.all(20),
-            child: MaterialButton(
-              onPressed: () {
-                // Motrar grafica
-
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      if (_ingresosTodos.isNotEmpty) {
-                        return GraficaBarras2(
-                          tipo: 'ingreso',
-                          sumaTotalElementos: _totalIngresos.toDouble(),
-                          listaCantidades: _sumaTotalPorCategoria,
-                        );
-                      } else { // Si hay elementos para graficar
-                        return AlertDialog(
-                          content: const Text("Aun no hay elementos para mostrar."),
-                          actions: [
-                            MaterialButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text("Aceptar"),
-                            )
-                          ],
-                        );
-                      }
-                    }
-                );
-
-
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container( // Texto balance general
-                    padding: EdgeInsets.only(bottom: 5.0),
-                    child: Text(
-                      //'\$ $_totalIngresosText',
-                      formatearCantidad(_totalIngresos.toDouble()),
-                      key: _tamanioTextoBalance,
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+    return FutureBuilder<void>( // Se utiliza FutureBuilder porque para construir el Scaffold primero se deben de cargar datos de funciones asincronas
+        future: _cargaInicial,
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.waiting) {
+            // Los datos estan cargando
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF02013C),
+                centerTitle: true,
+                title: Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    letterSpacing: 1.toDouble(),
                   ),
-                  Container( // linea debajo del balance general
-                    height: 1.0,
-                    width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
-                    color: Colors.black,
-                  ),
-                  const SizedBox(height: 10.0), // espacio
-                  const Text(
-                    "Total ingresos",
-                    style: TextStyle(
-                      color: Colors.black,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            )
-          ),
+              body: const Center(child: CircularProgressIndicator()),
+            );
+
+          } else if(snapshot.hasError) {
+            return Text("Ocurrio un error");
+
+          } else {
+            // Si cambio el tamaño del texto del balance (se construye hasta que FutureBuilder tiene datos)
+            if(_lineaAncho==0.0) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _obtenerTamanioTexto();
+              });
+            }
+
+            // Los datos se cargaron
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF02013C),
+                centerTitle: true,
+                title: Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    letterSpacing: 1.toDouble(),
+                  ),
+                ),
+              ),
+
+              body: Column(
+                children: <Widget>[
+
+                  // Parte superior (texto suma de ingresos)
+                  Container(
+                      width: double.infinity, // Se ajusta a toda la pantalla
+                      padding: EdgeInsets.all(20),
+                      child: MaterialButton(
+                        onPressed: () {
+                          // Motrar grafica
+
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                if (_ingresosTodos.isNotEmpty) {
+                                  return GraficaBarras2(
+                                    tipo: 'ingreso',
+                                    sumaTotalElementos: _totalIngresos.toDouble(),
+                                    listaCantidades: _sumaTotalPorCategoria,
+                                  );
+                                } else { // Si hay elementos para graficar
+                                  return AlertDialog(
+                                    content: const Text("Aun no hay elementos para mostrar."),
+                                    actions: [
+                                      MaterialButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text("Aceptar"),
+                                      )
+                                    ],
+                                  );
+                                }
+                              }
+                          );
 
 
-          // Pestañas con las categorias de los ingresos
-          TabBar(
-            controller: _tabController,
-              //labelColor: const Color(0xFF02013C),
-              unselectedLabelColor: Colors.grey,
-              isScrollable: true,
-              tabs: [ // Con cada elemento de mi lista generar una pestania
-                const Tab(text: 'Todos'),
-                ..._categorias.map(
-                        (categoria) => Tab(
-                            text: categoria['nombre'][0].toUpperCase()+categoria['nombre'].substring(1),
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container( // Texto balance general
+                              padding: EdgeInsets.only(bottom: 5.0),
+                              child: Text(
+                                //'\$ $_totalIngresosText',
+                                formatearCantidad(_totalIngresos.toDouble()),
+                                key: _tamanioTextoBalance,
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container( // linea debajo del balance general
+                              height: 1.0,
+                              width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
+                              color: Colors.black,
+                            ),
+                            const SizedBox(height: 10.0), // espacio
+                            const Text(
+                              "Total ingresos",
+                              style: TextStyle(
+                                color: Colors.black,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                          ],
                         ),
-                ).toList(),
-              ],
-          ),
+                      )
+                  ),
 
 
-          // Lista de contenido de cada pestaña
-          Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
-                    /*
+                  // Pestañas con las categorias de los ingresos
+                  TabBar(
+                    controller: _tabController,
+                    //labelColor: const Color(0xFF02013C),
+                    unselectedLabelColor: Colors.grey,
+                    isScrollable: true,
+                    tabs: [ // Con cada elemento de mi lista generar una pestania
+                      const Tab(text: 'Todos'),
+                      ..._categorias.map(
+                            (categoria) => Tab(
+                          text: categoria['nombre'][0].toUpperCase()+categoria['nombre'].substring(1),
+                        ),
+                      ).toList(),
+                    ],
+                  ),
+
+
+                  // Lista de contenido de cada pestaña
+                  Expanded(
+                      child: TabBarView(
+                          controller: _tabController,
+                          children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
+                        /*
                 [
                   //_buildScrollableList("Publicaciones"),
                   //_buildScrollableList("Respuestas"),
@@ -289,84 +287,73 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                 ],
 
                      */
-              )
-          ),
+                      )
+                  ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-             children: [
-               // Boton Agregar ingreso
-               MaterialButton(
-                   onPressed: () {
-                     showDialog(
-                         context: context,
-                         builder: (BuildContext context) {
-                           return CuadroDialogoAgregar(
-                             tipo: 'ingreso',
-                             listaCategorias: _categorias,
-                             usuario: widget.usuario,
-                           );
-                         }
-                     );
-                   },
-                   child: const Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(Icons.add_rounded),
-                       Text(
-                           "Agregar ingreso"
-                       ),
-                     ],
-                   )
-               ),
-               // Boton Agregar categoria
-               MaterialButton(
-                   onPressed: () {
-                     showDialog(
-                         context: context,
-                         builder: (BuildContext context) {
-                           return CuadroDialogoAgregarCategoria(
-                               tipo: 'ingreso',
-                               usuario: widget.usuario
-                           );
-                         }
-                     );
-                   },
-                   child: const Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(Icons.add_rounded),
-                       Text(
-                           "Agregar categoria"
-                       ),
-                     ],
-                   )
-               ),
-             ],
-          ),
-
-
-        ],
-      ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Boton Agregar ingreso
+                      MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoAgregar(
+                                    tipo: 'ingreso',
+                                    listaCategorias: _categorias,
+                                    usuario: widget.usuario,
+                                  );
+                                }
+                            );
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Text(
+                                  "Agregar ingreso"
+                              ),
+                            ],
+                          )
+                      ),
+                      // Boton Agregar categoria
+                      MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoAgregarCategoria(
+                                      tipo: 'ingreso',
+                                      usuario: widget.usuario
+                                  );
+                                }
+                            );
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Text(
+                                  "Agregar categoria"
+                              ),
+                            ],
+                          )
+                      ),
+                    ],
+                  ),
 
 
+                ],
+              ),
+
+
+            );
+          }
+        }
     );
+
   }
-
-
-
-  // Método para generar listas desplazables
-  Widget _buildScrollableList(String titulo) {
-    return SingleChildScrollView(
-      child: Column(
-        children: List.generate(
-          20, // Simulando 20 elementos
-              (index) => ListTile(title: Text("$titulo $index")),
-        ),
-      ),
-    );
-  }
-
 
 
   // Funcion para obtener el valor del ancho del widget Text despues de renderizarse

@@ -16,6 +16,7 @@ class Egresos extends StatefulWidget{
 
 class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
   late TabController _tabController; //  Sincronizar las pestañas
+  late Future<void> _cargaInicial; // Indicar la carga inicial de datos
 
   late List<Map<String, dynamic>> _categorias;
   late Map<String, dynamic> _sumaTotalPorCategoria;
@@ -26,51 +27,45 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
   final GlobalKey _tamanioTextoBalance = GlobalKey(); // global key para las dimensiones del widget
   double _lineaAncho = 0.0;
 
-  bool _cargandoCategorias = true; // Controlar la carga de los datos
-  bool _cargandoTotal = true;
-  bool _cargandoEgresosTodos = true;
+
 
   @override
   void initState() {
     super.initState();
+    _cargaInicial = _cargarDatosVista(); // Carga de datos de las funciones asincronas
+  }
 
-    // Obtener mi lista de categorias de egresos para el tabController
-    DataBaseOperaciones().obtenerCategorias("egreso").then((listaCat) {
-      setState(() {
-        _categorias = listaCat;
-        _tabController = TabController(length: listaCat.length+1, vsync: this);
+  // Funcion para ejecutar y esperar el resultado de las funcion asincronas que cargan datos
+  Future<void> _cargarDatosVista() async {
+    await Future.wait([
+      // Funciones de las que se espera un resultado
+      _obtenerCategorias(),
+      _obtenerSumaEgresos(),
+      _obtenerDatosEgresos()
+    ]);
+  }
 
-        // Obtener suma del monto total por categoria
-        _obtenerSumaTotalPorCategorias(listaCat).then((value) {
-          _sumaTotalPorCategoria = value;
-        });
+  // Obtener mi lista de categorias de egresos para el tabController
+  Future<void> _obtenerCategorias() async {
+    _categorias = await DataBaseOperaciones().obtenerCategorias("egreso");
+    _tabController = TabController(length: _categorias.length+1, vsync: this);
 
-        _cargandoCategorias = false; // datos cargados
-      });
+    // Obtener suma del monto total por categoria
+    _obtenerSumaTotalPorCategorias(_categorias).then((value) {
+      _sumaTotalPorCategoria = value;
     });
+  }
 
-    // Obtener la suma de los egresos del usuario
-    DataBaseOperaciones().sumarEgresosTodos(widget.usuario).then((value) {
-      setState(() {
-        _totalEgresosText = '+${value.toString()}';
-        _totalEgresos = value;
-        _cargandoTotal = false;
-      });
-    });
+  // Obtener la suma de los egresos del usuario
+  Future<void> _obtenerSumaEgresos() async {
+    final value = await DataBaseOperaciones().sumarEgresosTodos(widget.usuario);
+    _totalEgresosText = '+${value.toString()}';
+    _totalEgresos = value;
+  }
 
-    // Obtener todos los datos de egresos
-    DataBaseOperaciones().obtenerEgresosTodos(widget.usuario).then((value) {
-      setState(() {
-        _egresosTodos = value;
-        _cargandoEgresosTodos = false;
-      });
-    });
-
-    // esperar a que se renderice el widget para obtener su tamanio (texto de total egresos)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _obtenerTamanioTexto();
-    });
-
+  // Obtener todos los datos de egresos
+  Future<void> _obtenerDatosEgresos() async {
+    _egresosTodos = await DataBaseOperaciones().obtenerEgresosTodos(widget.usuario);
   }
 
   // Formatear cantidad de dinero
@@ -133,198 +128,208 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Se muestra pantalla de carga mientras cargan datos
-    if(_cargandoCategorias || _cargandoTotal || _cargandoEgresosTodos) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF02013C),
-          centerTitle: true,
-          title: Text(
-            widget.title,
-            style: TextStyle(
-              color: Colors.white,
-              letterSpacing: 1.toDouble(),
-            ),
-          ),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    return FutureBuilder<void>( // Se utiliza FutureBuilder porque para construir el Scaffold primero se deben de cargar datos de funciones asincronas
+        future: _cargaInicial,
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.waiting) {
+            // Los datos estan cargando
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF02013C),
+                centerTitle: true,
+                title: Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    letterSpacing: 1.toDouble(),
+                  ),
+                ),
+              ),
+              body: const Center(child: CircularProgressIndicator()),
+            );
 
-    // Si cambio el tamaño del texto del balance
-    if(_lineaAncho==0.0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _obtenerTamanioTexto();
-      });
-    }
+          } else if(snapshot.hasError) {
+            return Text("Ocurrio un error");
 
-    //print('Egresoooos: $_egresosTodos'); // ---------------------------------------
+          } else {
+            // Si cambio el tamaño del texto del balance (se construye hasta que FutureBuilder tiene datos)
+            if(_lineaAncho==0.0) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _obtenerTamanioTexto();
+              });
+            }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF02013C),
-        centerTitle: true,
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-              color: Colors.white,
-              letterSpacing: 1.0,
-          ),
-        ),
-      ),
+            // Los datos se cargaron
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF02013C),
+                centerTitle: true,
+                title: Text(
+                  widget.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
 
-      body: Column(
-        children: <Widget>[
+              body: Column(
+                children: <Widget>[
 
-          // Parte superior (texto suma de egresos)
-          Container(
-              width: double.infinity, // Se ajusta a toda la pantalla
-              padding: EdgeInsets.all(20),
-              child: MaterialButton(
-                onPressed: () {
-                  // Motrar grafica
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        if(_egresosTodos.isNotEmpty) { // Si hay elementos para graficar
-                          return GraficaBarras2(
-                            tipo: 'egreso',
-                            sumaTotalElementos: _totalEgresos.toDouble(),
-                            listaCantidades: _sumaTotalPorCategoria,
+                  // Parte superior (texto suma de egresos)
+                  Container(
+                      width: double.infinity, // Se ajusta a toda la pantalla
+                      padding: EdgeInsets.all(20),
+                      child: MaterialButton(
+                        onPressed: () {
+                          // Motrar grafica
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                if(_egresosTodos.isNotEmpty) { // Si hay elementos para graficar
+                                  return GraficaBarras2(
+                                    tipo: 'egreso',
+                                    sumaTotalElementos: _totalEgresos.toDouble(),
+                                    listaCantidades: _sumaTotalPorCategoria,
+                                  );
+                                } else {
+                                  return AlertDialog(
+                                    content: const Text("Aun no hay elementos para mostrar."),
+                                    actions: [
+                                      MaterialButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text("Aceptar"),
+                                      )
+                                    ],
+                                  );
+                                }
+                              }
                           );
-                        } else {
-                          return AlertDialog(
-                            content: const Text("Aun no hay elementos para mostrar."),
-                            actions: [
-                              MaterialButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text("Aceptar"),
-                              )
-                            ],
-                          );
-                        }
-                      }
-                  );
 
 
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container( // Texto balance general
-                      padding: const EdgeInsets.only(bottom: 5.0),
-                      child: Text(
-                        formatearCantidad(_totalEgresos.toDouble()),
-                        key: _tamanioTextoBalance,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container( // Texto balance general
+                              padding: const EdgeInsets.only(bottom: 5.0),
+                              child: Text(
+                                formatearCantidad(_totalEgresos.toDouble()),
+                                key: _tamanioTextoBalance,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container( // linea debajo del balance general
+                              height: 1.0,
+                              width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
+                              color: Colors.black,
+                            ),
+                            const SizedBox(height: 10.0), // espacio
+                            const Text(
+                              "Total egresos",
+                              style: TextStyle(
+                                color: Colors.black,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                    Container( // linea debajo del balance general
-                      height: 1.0,
-                      width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
-                      color: Colors.black,
-                    ),
-                    const SizedBox(height: 10.0), // espacio
-                    const Text(
-                      "Total egresos",
-                      style: TextStyle(
-                        color: Colors.black,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-          ),
+                      )
+                  ),
 
-          // Pestañas con las categorias de los ingresos
-          TabBar(
-            controller: _tabController,
-            unselectedLabelColor: Colors.grey,
-            isScrollable: true,
-            tabs: [ // Con cada elemento de mi lista generar una pestania
-              const Tab(text: 'Todos'),
-              ..._categorias.map(
-                    (categoria) => Tab(
-                  text: categoria['nombre'][0].toUpperCase()+categoria['nombre'].substring(1),
-                ),
-              ).toList(),
-            ],
+                  // Pestañas con las categorias de los ingresos
+                  TabBar(
+                    controller: _tabController,
+                    unselectedLabelColor: Colors.grey,
+                    isScrollable: true,
+                    tabs: [ // Con cada elemento de mi lista generar una pestania
+                      const Tab(text: 'Todos'),
+                      ..._categorias.map(
+                            (categoria) => Tab(
+                          text: categoria['nombre'][0].toUpperCase()+categoria['nombre'].substring(1),
+                        ),
+                      ).toList(),
+                    ],
 
-          ),
+                  ),
 
-          // Lista de contenido de cada pestaña
-          Expanded(
-              child: TabBarView(
-                  controller: _tabController,
-                  children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
-              )
-          ),
+                  // Lista de contenido de cada pestaña
+                  Expanded(
+                      child: TabBarView(
+                          controller: _tabController,
+                          children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
+                      )
+                  ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Boton Agregar egreso
-              MaterialButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return CuadroDialogoAgregar(
-                            tipo: 'egreso',
-                            listaCategorias: _categorias,
-                            usuario: widget.usuario,
-                          );
-                        }
-                    );
-                  },
-                  child: const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_rounded),
-                      Text(
-                          "Agregar egreso"
+                    children: <Widget>[
+                      // Boton Agregar egreso
+                      MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoAgregar(
+                                    tipo: 'egreso',
+                                    listaCategorias: _categorias,
+                                    usuario: widget.usuario,
+                                  );
+                                }
+                            );
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Text(
+                                  "Agregar egreso"
+                              ),
+                            ],
+                          )
+                      ),
+                      // Boton Agregar categoria
+                      MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoAgregarCategoria(
+                                      tipo: 'egreso',
+                                      usuario: widget.usuario
+                                  );
+                                }
+                            );
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Text(
+                                  "Agregar categoria"
+                              ),
+                            ],
+                          )
                       ),
                     ],
                   )
+
+
+
+                ],
               ),
-              // Boton Agregar categoria
-              MaterialButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return CuadroDialogoAgregarCategoria(
-                              tipo: 'egreso',
-                              usuario: widget.usuario
-                          );
-                        }
-                    );
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_rounded),
-                      Text(
-                          "Agregar categoria"
-                      ),
-                    ],
-                  )
-              ),
-            ],
-          )
 
 
-
-        ],
-      ),
-
-
+            );
+          }
+        }
     );
+
+
   }
 
   // Funcion para obtener el valor del ancho del widget Text despues de renderizarse
