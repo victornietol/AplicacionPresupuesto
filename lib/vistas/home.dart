@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
+import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title, required this.usuario});
@@ -70,6 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
     //final formato = NumberFormat("#,##0.00", "es_MX");
     final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
     return formatoDinero.format(monto);
+  }
+
+  //  Obtener porcentaje de egresos respecto a los ingresos
+  double _obtenerPorcentajeEgresos(double totalIngresos, double totalEgresos) {
+    double porcentaje = (totalEgresos*100) / totalIngresos;
+    if(porcentaje.isInfinite || porcentaje.isNaN) {
+      return 0.0; // Si no hay porcentaje debido a que no hay elementos
+    } else {
+      return porcentaje;
+    }
   }
   
   // Obtener la categoria con mayor sumatoria de ingresos
@@ -175,40 +186,56 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     width: double.infinity, // Se ajusta a toda la pantalla
                     padding: EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Container( // Texto balance general
-                          padding: EdgeInsets.only(bottom: 5.0),
-                          child: Text(
-                            _balanceGeneral,
-                            key: _tamanioTextoBalance,
-                            style: TextStyle(
-                              color: _balanceGeneral.startsWith('+') ? Colors.green : Colors.red,
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
+                    child: MaterialButton(
+                      onPressed: () {
+                        // Motrar grafica
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return GraficaRadialBar(
+                                  totalIngresos: _sumaTotalIngresos.toDouble(),
+                                  totalEgresos: _sumaTotalEgresos.toDouble(),
+                                  colorIngresos: Colors.green,
+                                  colorEgresos: Colors.red,
+                              );
+                            }
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Container( // Texto balance general
+                            padding: EdgeInsets.only(bottom: 5.0),
+                            child: Text(
+                              _balanceGeneral,
+                              key: _tamanioTextoBalance,
+                              style: TextStyle(
+                                color: _balanceGeneral.startsWith('+') ? Colors.green : Colors.red,
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
 
-                        Container( // linea debajo del balance general
-                          height: 1.0,
-                          width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
-                          color: Colors.black,
-                        ),
-
-                        const SizedBox(height: 10.0), // espacio
-
-                        const Text(
-                          "Balance general",
-                          style: TextStyle(
+                          Container( // linea debajo del balance general
+                            height: 1.0,
+                            width: _lineaAncho<20 ? 40 : (_lineaAncho/2.0), // Asignar el tamanio de la linea dinamicamente
                             color: Colors.black,
-                            letterSpacing: 2.0,
                           ),
-                        ),
 
-                      ],
-                    ),
+                          const SizedBox(height: 10.0), // espacio
+
+                          const Text(
+                            "Balance general",
+                            style: TextStyle(
+                              color: Colors.black,
+                              letterSpacing: 2.0,
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    )
                   ),
 
 
@@ -321,11 +348,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                         softWrap: true,
                                       ),
                                       Text(
-                                        formatearCantidad(_sumaTotalEgresos.toDouble()),
+                                        '${formatearCantidad(_sumaTotalEgresos.toDouble())} (${_obtenerPorcentajeEgresos(_sumaTotalIngresos.toDouble(), _sumaTotalEgresos.toDouble()).toStringAsFixed(2)}%)',
                                         style: const TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        softWrap: true,
                                       ),
                                     ],
                                   ),

@@ -31,8 +31,6 @@ class DataBaseOperaciones {
       path,
       version: 1,
       onCreate: (db, version) async {
-        // Activar FK
-        await db.execute('PRAGMA foreign_keys = ON;');
 
         // Valores iniciales
         List<Map<String, dynamic>> categorias_ingresos = [
@@ -133,6 +131,10 @@ class DataBaseOperaciones {
             await txn.insert('categoria_egreso', egreso);
           }
         });
+      },
+      onOpen: (db) async {
+        // Activar FK cada que se abra la BD
+        await db.execute('PRAGMA foreign_keys = ON;');
       }
     );
   }

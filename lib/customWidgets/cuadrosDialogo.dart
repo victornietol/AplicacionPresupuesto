@@ -4,6 +4,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
 
 // Cuadro de de dialogo para agregar un ingreso o egreso
 class CuadroDialogoAgregar extends StatefulWidget {
@@ -1561,4 +1563,82 @@ class _GraficaBarras2State extends State<GraficaBarras2> {
     );
   }
 
+}
+
+
+// Grafica Radial Bar
+class GraficaRadialBar extends StatefulWidget {
+  const GraficaRadialBar({super.key,
+    required this.totalIngresos,
+    required this.totalEgresos,
+    required this.colorIngresos,
+    required this.colorEgresos,
+  });
+  final double totalIngresos;
+  final double totalEgresos;
+  final Color colorIngresos;
+  final Color colorEgresos;
+
+  @override
+  State<GraficaRadialBar> createState() => GraficaRadialBarState();
+}
+
+class GraficaRadialBarState extends State<GraficaRadialBar> {
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> datos = [
+      {'tipo':'Ingresos', 'monto':widget.totalIngresos, 'color':widget.colorIngresos},
+      {'tipo':'Egresos', 'monto':widget.totalEgresos, 'color':widget.colorEgresos}
+    ];
+
+    return Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child: Container(
+            width: MediaQuery.of(context).size.width * 0.95, //Ancho de la pantalla
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SfCircularChart(
+                      title: const ChartTitle(
+                        text: 'Cantidades',
+                      ),
+                      legend: const Legend(isVisible: true, isResponsive: true),
+                      series: <RadialBarSeries<Map<String, dynamic>, String>>[
+                        RadialBarSeries<Map<String, dynamic>, String>(
+                          dataSource: datos,
+                          xValueMapper: (Map<String, dynamic> data, _) => data['tipo'],
+                          yValueMapper: (Map<String, dynamic> data, _) => data['monto'],
+                          pointColorMapper: (Map<String, dynamic> data, _) => data['color'],
+                          dataLabelSettings: const DataLabelSettings(isVisible: true),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 35,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.0),
+                        color: const Color(0xFF02013C),
+                      ),
+                      child: MaterialButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          "Cerrar",
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+            )
+        )
+    );
+  }
 }
