@@ -562,12 +562,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                   textStyle: TextStyle(
                     color: Colors.indigo,
                   ),
-                  /*
-                  colorTexto: Colors.green,
-                  textSize: 20.0,
-                  fontWeight: FontWeight.bold,
 
-                   */
                 ),
                 EtiquetaPorcentaje(
                   texto: "${formatearCantidad(_sumaTotalCategoria)} (${_porcentajeCategoria.toStringAsFixed(2)}%)",
@@ -576,12 +571,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                     fontWeight: FontWeight.bold,
                     color: Colors.indigo,
                   ),
-                  /*
-                  colorTexto: Colors.green,
-                  textSize: 20.0,
-                  fontWeight: FontWeight.bold,
 
-                   */
                 ),
                 MaterialButton(
                   minWidth: 20.0,
@@ -828,9 +818,6 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
     return Column( // Esto es lo que regresa el widget
       children: [
 
-
-
-
         // Botones de ordenamiento
         Row(
           children: [
@@ -927,57 +914,6 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
         ),
       ],
     );
-    /*
-      Column(
-      children: [
-        // Boton para ordenamiento
-        DropdownButtonHideUnderline(
-          child: DropdownButton2<String>(
-            isExpanded: true,
-            hint: const Text(
-              'Ordenar por',
-              style: TextStyle(
-                  color: Colors.black
-              ),
-            ),
-            items: _ordenarPorCampo
-                .map((String item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item[0].toUpperCase()+item.substring(1),
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ))
-                .toList(),
-            value: _ordenarPorCampo_Valor,
-            onChanged: (String? value) {
-              setState(() {
-                _ordenarPorCampo_Valor = value;
-              });
-            },
-            buttonStyleData: const ButtonStyleData(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              height: 40,
-              width: double.maxFinite,
-            ),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 40,
-            ),
-          ),
-        ),
-
-        // Lista de botones
-        SingleChildScrollView(
-          child: Column(
-          children: botones,
-          ),
-        ),
-      ],
-    );
-
-     */
   }
 }
 

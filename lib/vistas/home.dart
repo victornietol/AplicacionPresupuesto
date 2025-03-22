@@ -177,8 +177,60 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   centerTitle: true,
-                  backgroundColor: const Color(0xFF02013C)
+                  backgroundColor: const Color(0xFF02013C),
+                  iconTheme: const IconThemeData(color: Colors.white), // Color del icono
               ),
+
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    const DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Color(0xFF02013C),
+                      ),
+                      child: Text(
+                        'Menú Lateral',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.home),
+                      title: Text('Inicio'),
+                      onTap: () {
+                        // Agregar acción al seleccionar este ítem
+                        Navigator.pop(context);  // Cierra el drawer
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.account_circle),
+                      title: Text('Perfil'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text('Ajustes'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.exit_to_app),
+                      title: Text('Cerrar sesión'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+
+              ),
+
               body: Column(
                 children: <Widget>[
 

@@ -315,6 +315,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                         _guardarDatos(context).then((cargaCorrecta) {
                           if(cargaCorrecta && widget.tipo=='ingreso') {
                             // Si la carga se realizo se recarga la vista de ingresos
+                            Navigator.of(context).pop();
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
@@ -323,6 +324,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                             );
                           } else if(cargaCorrecta && widget.tipo=='egreso') {
                             // Si la carga se realizo se recarga la vista de egresos
+                            Navigator.of(context).pop();
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
