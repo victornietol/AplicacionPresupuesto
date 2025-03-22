@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
+import 'package:calculadora_presupuesto/navegador.dart';
 
 class Egresos extends StatefulWidget{
   const Egresos({super.key, required this.title, required this.usuario});
@@ -179,7 +180,8 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                   // Parte superior (texto suma de egresos)
                   Container(
                       width: double.infinity, // Se ajusta a toda la pantalla
-                      padding: EdgeInsets.all(20),
+                      color: const Color(0xffffdada),
+                      padding: const EdgeInsets.all(20),
                       child: MaterialButton(
                         onPressed: () {
                           // Motrar grafica
@@ -278,6 +280,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                                     tipo: 'egreso',
                                     listaCategorias: _categorias,
                                     usuario: widget.usuario,
+                                    vistaDestino: Navegador(inicio: 2, usuario: widget.usuario),
                                   );
                                 }
                             );

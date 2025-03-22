@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
+import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:decimal/decimal.dart';
 import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:intl/intl.dart';
@@ -183,7 +184,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                   // Parte superior (texto suma de ingresos)
                   Container(
                       width: double.infinity, // Se ajusta a toda la pantalla
-                      padding: EdgeInsets.all(20),
+                      color: const Color(0xFFd4fed7),
+                      padding: const EdgeInsets.all(20),
                       child: MaterialButton(
                         onPressed: () {
                           // Motrar grafica
@@ -219,7 +221,6 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                             Container( // Texto balance general
                               padding: EdgeInsets.only(bottom: 5.0),
                               child: Text(
-                                //'\$ $_totalIngresosText',
                                 formatearCantidad(_totalIngresos.toDouble()),
                                 key: _tamanioTextoBalance,
                                 style: const TextStyle(
@@ -270,23 +271,6 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                       child: TabBarView(
                           controller: _tabController,
                           children: _crearWidgetsElementos() // Se crean los elementos para las pestañas
-                        /*
-                [
-                  //_buildScrollableList("Publicaciones"),
-                  //_buildScrollableList("Respuestas"),
-                  //_buildScrollableList("Destacados"),
-                  BotonIngresoEgreso(
-                    tipo: 'ingreso',
-                    listaElementos: _ingresosTodos,
-                    totalIngresos: _totalIngresos,
-                    listaCategorias: _categorias,
-                    usuario: widget.usuario,
-                  ),
-                  Text("Hola2"),
-                  Text("Hola3"),
-                ],
-
-                     */
                       )
                   ),
 
@@ -303,6 +287,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                                     tipo: 'ingreso',
                                     listaCategorias: _categorias,
                                     usuario: widget.usuario,
+                                    vistaDestino: Navegador(inicio: 0, usuario: widget.usuario),
                                   );
                                 }
                             );

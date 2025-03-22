@@ -250,41 +250,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // Ingresos
-                                /*
-                                MaterialButton(
-                                  onPressed: () => print('pks'),
-                                  padding: const EdgeInsets.all(0.0),
-                                  splashColor: Colors.green,
-                                  child: Container(
-                                      width: MediaQuery.of(context).size.width/2,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                      alignment: AlignmentDirectional.center,
-                                      color: const Color(0xFFd4fed7),
-                                      child: Column(
-                                        children: [
-                                          // Texto de ingresos
-                                          const Text(
-                                            'Total ingresos:',
-                                            style: TextStyle(
-                                              color: Colors.green,
-                                              //fontWeight: FontWeight.bold
-                                            ),
-                                            softWrap: true,
-                                          ),
-                                          Text(
-                                            formatearCantidad(_sumaTotalIngresos.toDouble()),
-                                            style: const TextStyle(
-                                              color: Colors.green,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-
-                                  ),
-                                ),
-
-                                 */
                                 MaterialButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -524,6 +489,63 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
 
+              floatingActionButton: Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.14,
+                    left: MediaQuery.of(context).size.width * 0.075,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CuadroDialogoAgregar(
+                                  tipo: 'ingreso',
+                                  listaCategorias: _listaCategoriasIngreso,
+                                  usuario: widget.usuario,
+                                  vistaDestino: Navegador(inicio: 1, usuario: widget.usuario),
+                              );
+                            }
+                        );
+                      },
+                      backgroundColor: const Color(0xFFd4fed7),
+                      tooltip: 'Agregar ingreso',
+                      heroTag: 'btnAgregarIngreso',
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.14,
+                    right: MediaQuery.of(context).size.width * 0.0001,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CuadroDialogoAgregar(
+                                  tipo: 'egreso',
+                                  listaCategorias: _listaCategoriasEgreso,
+                                  usuario: widget.usuario,
+                                  vistaDestino: Navegador(inicio: 1, usuario: widget.usuario),
+                              );
+                            }
+                        );
+                      },
+                      backgroundColor: const Color(0xffffdada),
+                      tooltip: 'Agregar egreso',
+                      heroTag: 'btnAgregarEgreso',
+                      child: const Icon(
+                        Icons.remove,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
             );
           }
         }
@@ -544,24 +566,3 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 }
-
-
-/*
-
-Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      children: [
-                                        BotonIngresoEgreso2(
-                                            tipo: 'ingreso',
-                                            listaElementos: _listaTopIngresos,
-                                            totalIngresos: _sumaTotalIngresos,
-                                            listaCategorias: _listaCategoriasIngreso,
-                                            usuario: widget.usuario,
-                                            mostrarTotalIngresosCategoria: false
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
- */

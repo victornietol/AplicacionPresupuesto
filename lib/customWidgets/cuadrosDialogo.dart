@@ -12,11 +12,13 @@ class CuadroDialogoAgregar extends StatefulWidget {
   const CuadroDialogoAgregar({super.key,
     required this.tipo,
     required this.listaCategorias,
-    required this.usuario
+    required this.usuario,
+    required this.vistaDestino,
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
   final String usuario;
+  final Navegador vistaDestino;
 
 
   @override
@@ -316,7 +318,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
+                                  builder: (context) => widget.vistaDestino),
                                   (Route<dynamic> route) => false,
                             );
                           } else if(cargaCorrecta && widget.tipo=='egreso') {
@@ -324,7 +326,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
+                                  builder: (context) => widget.vistaDestino),
                                   (Route<dynamic> route) => false,
                             );
                           }
