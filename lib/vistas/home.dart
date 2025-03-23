@@ -138,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if(snapshot.connectionState == ConnectionState.waiting) {
             // Los datos estan cargando
             return Scaffold(
+              /*
               appBar: AppBar(
                 backgroundColor: const Color(0xFF02013C),
                 centerTitle: true,
@@ -149,6 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+
+               */
               body: const Center(child: CircularProgressIndicator()),
             );
 
@@ -168,68 +171,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // Los datos se cargaron
             return Scaffold(
-              appBar: AppBar(
-                  title: Text(
-                    widget.title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        letterSpacing: 1.0
-                    ),
-                  ),
-                  centerTitle: true,
-                  backgroundColor: const Color(0xFF02013C),
-                  iconTheme: const IconThemeData(color: Colors.white), // Color del icono
-              ),
 
-              drawer: Drawer(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: <Widget>[
-                    const DrawerHeader(
-                      decoration: BoxDecoration(
-                        color: Color(0xFF02013C),
-                      ),
-                      child: Text(
-                        'Menú Lateral',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.home),
-                      title: Text('Inicio'),
-                      onTap: () {
-                        // Agregar acción al seleccionar este ítem
-                        Navigator.pop(context);  // Cierra el drawer
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.account_circle),
-                      title: Text('Perfil'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.settings),
-                      title: Text('Ajustes'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.exit_to_app),
-                      title: Text('Cerrar sesión'),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
 
-              ),
+
 
               body: Column(
                 children: <Widget>[
@@ -544,7 +488,7 @@ class _MyHomePageState extends State<MyHomePage> {
               floatingActionButton: Stack(
                 children: <Widget>[
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.14,
+                    top: MediaQuery.of(context).size.height * 0.055,
                     left: MediaQuery.of(context).size.width * 0.075,
                     child: FloatingActionButton(
                       onPressed: () {
@@ -570,7 +514,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.14,
+                    top: MediaQuery.of(context).size.height * 0.055,
                     right: MediaQuery.of(context).size.width * 0.0001,
                     child: FloatingActionButton(
                       onPressed: () {

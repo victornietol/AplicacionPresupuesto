@@ -135,6 +135,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
           if(snapshot.connectionState == ConnectionState.waiting) {
             // Los datos estan cargando
             return Scaffold(
+              /*
               appBar: AppBar(
                 backgroundColor: const Color(0xFF02013C),
                 centerTitle: true,
@@ -146,6 +147,8 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
+
+               */
               body: const Center(child: CircularProgressIndicator()),
             );
 
@@ -162,6 +165,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
 
             // Los datos se cargaron
             return Scaffold(
+              /*
               appBar: AppBar(
                 backgroundColor: const Color(0xFF02013C),
                 centerTitle: true,
@@ -173,6 +177,8 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
+
+               */
 
               body: Column(
                 children: <Widget>[
