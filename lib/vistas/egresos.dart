@@ -7,9 +7,10 @@ import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:calculadora_presupuesto/navegador.dart';
 
 class Egresos extends StatefulWidget{
-  const Egresos({super.key, required this.title, required this.usuario});
+  const Egresos({super.key, required this.title, required this.usuario, required this.idPresupuesto});
   final String title;
   final String usuario;
+  final int idPresupuesto;
 
   @override
   State<Egresos> createState() => _EgresosState();
@@ -48,7 +49,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
 
   // Obtener mi lista de categorias de egresos para el tabController
   Future<void> _obtenerCategorias() async {
-    _categorias = await DataBaseOperaciones().obtenerCategorias("egreso");
+    _categorias = await DataBaseOperaciones().obtenerCategorias("egreso", widget.idPresupuesto);
     _tabController = TabController(length: _categorias.length+1, vsync: this);
 
     // Obtener suma del monto total por categoria
@@ -59,14 +60,14 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
 
   // Obtener la suma de los egresos del usuario
   Future<void> _obtenerSumaEgresos() async {
-    final value = await DataBaseOperaciones().sumarEgresosTodos(widget.usuario);
+    final value = await DataBaseOperaciones().sumarEgresosTodos(widget.usuario, widget.idPresupuesto);
     _totalEgresosText = '+${value.toString()}';
     _totalEgresos = value;
   }
 
   // Obtener todos los datos de egresos
   Future<void> _obtenerDatosEgresos() async {
-    _egresosTodos = await DataBaseOperaciones().obtenerEgresosTodos(widget.usuario);
+    _egresosTodos = await DataBaseOperaciones().obtenerEgresosTodos(widget.usuario, widget.idPresupuesto);
   }
 
   // Formatear cantidad de dinero
@@ -88,7 +89,8 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
           totalIngresos: _totalEgresos,
           listaCategorias: _categorias,
           usuario: widget.usuario,
-          mostrarTotalIngresosCategoria: false
+          mostrarTotalIngresosCategoria: false,
+          idPresupuesto: widget.idPresupuesto,
       ),
     );
 
@@ -108,6 +110,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
           usuario: widget.usuario,
           mostrarTotalIngresosCategoria: true,
           nombreCategoria: categoria['nombre'],
+          idPresupuesto: widget.idPresupuesto,
         ),
       );
     }
@@ -120,7 +123,7 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
     Map<String, dynamic> sumaTotalPorCategorias = {};
     for(var categoria in listaCategorias) {
       // Obtener monto
-      Decimal monto = await DataBaseOperaciones().sumarEgresosCategoria(categoria['nombre'], widget.usuario);
+      Decimal monto = await DataBaseOperaciones().sumarEgresosCategoria(categoria['nombre'], widget.usuario, widget.idPresupuesto);
       // Guardar elemento
       sumaTotalPorCategorias[categoria['nombre']] = monto.toDouble();
     }
@@ -279,17 +282,37 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                       // Boton Agregar egreso
                       MaterialButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CuadroDialogoAgregar(
-                                    tipo: 'egreso',
-                                    listaCategorias: _categorias,
-                                    usuario: widget.usuario,
-                                    vistaDestino: Navegador(inicio: 2, usuario: widget.usuario),
-                                  );
-                                }
-                            );
+                            if(_categorias.isNotEmpty) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CuadroDialogoAgregar(
+                                      tipo: 'egreso',
+                                      listaCategorias: _categorias,
+                                      usuario: widget.usuario,
+                                      vistaDestino: Navegador(inicio: 2, usuario: widget.usuario),
+                                      idPresupuesto: widget.idPresupuesto,
+                                    );
+                                  }
+                              );
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: const Text(
+                                          'Antes debe agregar una categoria para el egreso.'
+                                      ),
+                                      actions: [
+                                        MaterialButton(
+                                          onPressed: () {Navigator.of(context).pop();},
+                                          child: const Text('Aceptar'),
+                                        )
+                                      ],
+                                    );
+                                  }
+                              );
+                            }
                           },
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -309,7 +332,8 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                                 builder: (BuildContext context) {
                                   return CuadroDialogoAgregarCategoria(
                                       tipo: 'egreso',
-                                      usuario: widget.usuario
+                                      usuario: widget.usuario,
+                                      idPresupuesto: widget.idPresupuesto,
                                   );
                                 }
                             );

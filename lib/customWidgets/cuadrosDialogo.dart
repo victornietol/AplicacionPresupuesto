@@ -14,11 +14,13 @@ class CuadroDialogoAgregar extends StatefulWidget {
     required this.listaCategorias,
     required this.usuario,
     required this.vistaDestino,
+    required this.idPresupuesto,
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
   final String usuario;
   final Navegador vistaDestino;
+  final int idPresupuesto;
 
 
   @override
@@ -60,7 +62,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
         datos['fk_id_usuario']=usuario['id_usuario'];
 
         // Obtener id de la categoria
-        int? idCategoria = await DataBaseOperaciones().obtenerIdCategoria('ingreso', _categoriaSeleccionada??'');
+        int? idCategoria = await DataBaseOperaciones().obtenerIdCategoria('ingreso', _categoriaSeleccionada??'', widget.idPresupuesto);
         datos['fk_id_categoria_ingreso']=idCategoria ?? -1;
 
         // Hacer insercion
@@ -117,7 +119,7 @@ class _CuadroDialogoAgregarState extends State<CuadroDialogoAgregar> {
         datos['fk_id_usuario']=usuario['id_usuario'];
 
         // Obtener id de la categoria
-        int? idCategoria = await DataBaseOperaciones().obtenerIdCategoria('egreso', _categoriaSeleccionada??'');
+        int? idCategoria = await DataBaseOperaciones().obtenerIdCategoria('egreso', _categoriaSeleccionada??'', widget.idPresupuesto);
         datos['fk_id_categoria_egreso']=idCategoria ?? -1;
 
         // Hacer insercion
@@ -362,13 +364,15 @@ class CuadroDialogoEditar extends StatefulWidget {
     required this.listaCategorias,
     required this.usuario,
     required this.elemento,
-    required this.categoriaElemento
+    required this.categoriaElemento,
+    required this.idPresupuesto,
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
   final String usuario;
   final Map<String, dynamic> elemento;
   final String categoriaElemento;
+  final int idPresupuesto;
 
 
   @override
@@ -426,7 +430,8 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
             _nombreTEC.text,
             _monto,
             _descripcionTEC.text,
-            _categoriaSeleccionada ?? ''
+            _categoriaSeleccionada ?? '',
+            widget.idPresupuesto
         );
         return cargaExitosa;
 
@@ -446,7 +451,8 @@ class _CuadroDialogoEditarState extends State<CuadroDialogoEditar> {
             _nombreTEC.text,
             _monto,
             _descripcionTEC.text,
-            _categoriaSeleccionada ?? ''
+            _categoriaSeleccionada ?? '',
+            widget.idPresupuesto
         );
         return cargaExitosa;
 
@@ -721,7 +727,8 @@ class CuadroDialogoDetalles extends StatefulWidget {
     required this.categoriaElemento,
     required this.montoFormateado,
     required this.porcentaje,
-    required this.usuario
+    required this.usuario,
+    required this.idPresupuesto,
   });
   final String tipo;
   final List<Map<String, dynamic>> listaCategorias;
@@ -730,6 +737,7 @@ class CuadroDialogoDetalles extends StatefulWidget {
   final String montoFormateado;
   final double porcentaje;
   final String usuario;
+  final int idPresupuesto;
 
 
   @override
@@ -1049,7 +1057,8 @@ class _CuadroDialogoDetallesState extends State<CuadroDialogoDetalles> {
                                         listaCategorias: widget.listaCategorias,
                                         usuario: widget.usuario,
                                         elemento: widget.elemento,
-                                        categoriaElemento: widget.categoriaElemento
+                                        categoriaElemento: widget.categoriaElemento,
+                                        idPresupuesto: widget.idPresupuesto,
                                     );
                                   }
                               );
@@ -1102,9 +1111,11 @@ class CuadroDialogoAgregarCategoria extends StatefulWidget {
   const CuadroDialogoAgregarCategoria({super.key,
     required this.tipo,
     required this.usuario,
+    required this.idPresupuesto,
   });
   final String tipo;
   final String usuario;
+  final int idPresupuesto;
 
   @override
   State<CuadroDialogoAgregarCategoria> createState() => _CuadroDialogoAgregarCategoriaState();
@@ -1123,9 +1134,9 @@ class _CuadroDialogoAgregarCategoriaState extends State<CuadroDialogoAgregarCate
       try {
         switch (tipo) {
           case 'ingreso':
-            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo);
+            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo, widget.idPresupuesto);
           case 'egreso':
-            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo);
+            return await DataBaseOperaciones().insertarCategoria(nombreCategoria.toLowerCase(), tipo, widget.idPresupuesto);
           default:
             return false; // No se inserto
         }

@@ -16,6 +16,7 @@ class _NavegadorState extends State<Navegador>{
   late int _indice; // controlar el indice de la vista a mostrar
   final _vistas = []; // lista para las vistas
   final List _titulos = ['Ingresos', 'Resumen Presupuesto', 'Egresos'];
+  final int _idPresupuesto = 1;
 
   // Vistas que se van a manejar
   @override
@@ -23,13 +24,13 @@ class _NavegadorState extends State<Navegador>{
     super.initState();
     _indice = widget.inicio;
     _vistas.add(
-      Ingresos(title: _titulos[_indice], usuario: widget.usuario)
+      Ingresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
     );
     _vistas.add(
-        MyHomePage(title: _titulos[_indice], usuario: widget.usuario)
+        MyHomePage(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
     );
     _vistas.add(
-      Egresos(title: _titulos[_indice], usuario: widget.usuario)
+      Egresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
     );
   }
 

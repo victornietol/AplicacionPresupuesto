@@ -15,6 +15,7 @@ class BotonIngresoEgreso extends StatefulWidget {
     required this.totalIngresos,
     required this.listaCategorias,
     required this.usuario,
+    required this.idPresupuesto,
     required this.mostrarTotalIngresosCategoria
   });
   final String tipo; // Indica si es Ingreso o Egreso
@@ -22,6 +23,7 @@ class BotonIngresoEgreso extends StatefulWidget {
   final Decimal totalIngresos;
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
   final String usuario;
+  final int idPresupuesto;
   final bool mostrarTotalIngresosCategoria;
 
 
@@ -118,6 +120,7 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                             categoriaElemento: categoria,
                             montoFormateado: montoFormateado,
                             porcentaje: porcentaje,
+                            idPresupuesto: widget.idPresupuesto,
                             usuario: widget.usuario
                         );
                       }
@@ -456,6 +459,7 @@ class BotonIngresoEgreso2 extends StatefulWidget {
     required this.listaCategorias,
     required this.usuario,
     required this.mostrarTotalIngresosCategoria,
+    required this.idPresupuesto,
     this.nombreCategoria,
   });
   final String tipo; // Indica si es Ingreso o Egreso
@@ -464,6 +468,7 @@ class BotonIngresoEgreso2 extends StatefulWidget {
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
   final String usuario;
   final bool mostrarTotalIngresosCategoria;
+  final int idPresupuesto;
   final String? nombreCategoria;
 
 
@@ -505,9 +510,9 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
   Future<bool> _eliminarCategoria(String nombreCategoria, String tipo) async {
     switch (tipo) {
       case 'ingreso':
-        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
+        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo, widget.idPresupuesto);
       case 'egreso':
-        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
+        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo, widget.idPresupuesto);
       default:
         return false;
     }
@@ -687,6 +692,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                           categoriaElemento: categoria,
                           montoFormateado: montoFormateado,
                           porcentaje: porcentaje,
+                          idPresupuesto: widget.idPresupuesto,
                           usuario: widget.usuario
                       );
                     }
@@ -928,6 +934,7 @@ class BotonIngresoEgresoRanking extends StatefulWidget {
     required this.listaCategorias,
     required this.usuario,
     required this.mostrarTotalIngresosCategoria,
+    required this.idPresupuesto,
     this.nombreCategoria,
   });
   final String tipo; // Indica si es Ingreso o Egreso
@@ -936,6 +943,7 @@ class BotonIngresoEgresoRanking extends StatefulWidget {
   final List<Map<String, dynamic>> listaCategorias; // Datos completos de las categorias (tabla categorias)
   final String usuario;
   final bool mostrarTotalIngresosCategoria;
+  final int idPresupuesto;
   final String? nombreCategoria;
 
 
@@ -971,18 +979,6 @@ class _BotonIngresoEgresoRankingState extends State<BotonIngresoEgresoRanking> {
           (element) => element['id_categoria']==fk_id,
       orElse: () => {'nombre': 'Sin categoria'},
     )['nombre'];
-  }
-
-  // Eliminar una categoria
-  Future<bool> _eliminarCategoria(String nombreCategoria, String tipo) async {
-    switch (tipo) {
-      case 'ingreso':
-        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
-      case 'egreso':
-        return await DataBaseOperaciones().eliminarCategoria(nombreCategoria, tipo);
-      default:
-        return false;
-    }
   }
 
   // Formatear cantidad de dinero
@@ -1062,6 +1058,7 @@ class _BotonIngresoEgresoRankingState extends State<BotonIngresoEgresoRanking> {
                           categoriaElemento: categoria,
                           montoFormateado: montoFormateado,
                           porcentaje: porcentaje,
+                          idPresupuesto: widget.idPresupuesto,
                           usuario: widget.usuario
                       );
                     }

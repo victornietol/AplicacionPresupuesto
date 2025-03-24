@@ -67,11 +67,24 @@ class DataBaseOperaciones {
             )
           ''');
 
+          // tabla para diferentes presupuestos
+          await txn.execute('''
+            CREATE TABLE presupuesto (
+              id_presupuesto INTEGER PRIMARY KEY AUTOINCREMENT,
+              nombre TEXT NOT NULL,
+              fk_id_usuario INTEGER,
+              FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+            )
+          ''');
+
           // tabla categoria egresos
           await txn.execute('''
             CREATE TABLE categoria_egreso (
               id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
-              nombre TEXT NOT NULL UNIQUE
+              nombre TEXT NOT NULL UNIQUE,
+              fk_id_presupuesto INTEGER,
+              FOREIGN KEY (fk_id_presupuesto) REFERENCES presupuesto(id_presupuesto) ON DELETE CASCADE ON UPDATE CASCADE,
+              UNIQUE (nombre, fk_id_presupuesto)
             )
           ''');
 
@@ -79,7 +92,10 @@ class DataBaseOperaciones {
           await txn.execute('''
             CREATE TABLE categoria_ingreso (
               id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
-              nombre TEXT NOT NULL UNIQUE
+              nombre TEXT NOT NULL UNIQUE,
+              fk_id_presupuesto INTEGER,
+              FOREIGN KEY (fk_id_presupuesto) REFERENCES presupuesto(id_presupuesto) ON DELETE CASCADE ON UPDATE CASCADE,
+              UNIQUE (nombre, fk_id_presupuesto)
             )
           ''');
 
@@ -93,8 +109,8 @@ class DataBaseOperaciones {
               fecha_registro TEXT NOT NULL,
               fk_id_usuario INTEGER,
               fk_id_categoria_ingreso INTEGER,
-              FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
-              FOREIGN KEY (fk_id_categoria_ingreso) REFERENCES categoria_ingreso(id_categoria) ON DELETE CASCADE
+              FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE  ON UPDATE CASCADE
+              FOREIGN KEY (fk_id_categoria_ingreso) REFERENCES categoria_ingreso(id_categoria) ON DELETE CASCADE  ON UPDATE CASCADE
             )
           ''');
 
@@ -108,8 +124,8 @@ class DataBaseOperaciones {
               fecha_registro TEXT NOT NULL,
               fk_id_usuario INTEGER,
               fk_id_categoria_egreso INTEGER,
-              FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
-              FOREIGN KEY (fk_id_categoria_egreso) REFERENCES categoria_egreso(id_categoria) ON DELETE CASCADE
+              FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+              FOREIGN KEY (fk_id_categoria_egreso) REFERENCES categoria_egreso(id_categoria) ON DELETE CASCADE ON UPDATE CASCADE
             )
           ''');
 
@@ -121,6 +137,14 @@ class DataBaseOperaciones {
               }
           );
 
+          // Insertar presupuesto inicial
+          await txn.insert('presupuesto',
+              {'nombre':'inicial',
+                'fk_id_usuario':1
+              }
+          );
+
+/*
           // Insertar categorias ingresos
           for(var ingreso in categorias_ingresos) {
             await txn.insert('categoria_ingreso', ingreso);
@@ -130,6 +154,9 @@ class DataBaseOperaciones {
           for(var egreso in categorias_egresos) {
             await txn.insert('categoria_egreso', egreso);
           }
+
+ */
+
         });
       },
       onOpen: (db) async {
@@ -211,14 +238,26 @@ class DataBaseOperaciones {
     }
   }
 
+  // Obtener presupuestos de un usuario
+  Future<List<Map<String, dynamic>>> obtenerPresupuestos(String nombreUsuario) async {
+    Map<String, dynamic> datosUser = await obtenerUsuario(nombreUsuario);
+    final db = await database;
+
+    return db.query(
+      'presupuesto',
+      where: 'fk_id_usuario = ?',
+      whereArgs: [datosUser['id_usuario']]
+    );
+  }
+
   // Obtener id de la categoria ingreso
-  Future<int?> obtenerIdCategoria(String tipo, String categoria) async {
+  Future<int?> obtenerIdCategoria(String tipo, String categoria, int idPresupuesto) async {
     final db = await database;
 
     final datosCategoria = await db.query(
         'categoria_$tipo',
-        where: 'nombre = ?',
-        whereArgs: [categoria],
+        where: 'nombre = ? AND fk_id_presupuesto = ?',
+        whereArgs: [categoria, idPresupuesto],
         columns: ['id_categoria']
     );
 
@@ -229,32 +268,32 @@ class DataBaseOperaciones {
     }
   }
 
-  // Obtener el listado de categorias
-  Future<List<Map<String, dynamic>>> obtenerCategorias(String tipo) async {
+  // Obtener el listado de categorias de un presupuesto
+  Future<List<Map<String, dynamic>>> obtenerCategorias(String tipo, int idPresupuesto) async {
     final db = await database;
     if(tipo=='ingreso') {
-      return db.query('categoria_ingreso');
+      return db.query('categoria_ingreso', where: 'fk_id_presupuesto = ?', whereArgs: [idPresupuesto]);
     } else if(tipo=='egreso') {
-      return db.query('categoria_egreso');
+      return db.query('categoria_egreso', where: 'fk_id_presupuesto = ?', whereArgs: [idPresupuesto]);
     } else {
       return []; // Categoria incorrecta
     }
   }
 
   // Insertar categoria
-  Future<bool> insertarCategoria(String nombre, String tipo) async {
+  Future<bool> insertarCategoria(String nombre, String tipo, int idPresupuesto) async {
     final db = await database;
     int insercion = 0;
 
     if(tipo=='ingreso') {
       insercion = await db.insert(
           'categoria_ingreso', // tabla
-          {'nombre': nombre} // campo
+          {'nombre': nombre, 'fk_id_presupuesto': idPresupuesto} // campo
       );
     } else if(tipo=='egreso') {
       insercion = await db.insert(
           'categoria_egreso', // tabla
-          {'nombre': nombre} // campo
+          {'nombre': nombre, 'fk_id_presupuesto': idPresupuesto} // campo
       );
     } else {
       return false; // No se realizo insercion
@@ -263,56 +302,58 @@ class DataBaseOperaciones {
   }
 
   // Eliminar categoria
-  Future<bool> eliminarCategoria(String nombre, String tipo) async {
+  Future<bool> eliminarCategoria(String nombre, String tipo, int idPresupuesto) async {
     final db = await database;
     int eliminacion = 0;
 
     if(tipo=='ingreso') {
-      eliminacion = await db.delete('categoria_ingreso', where: 'nombre = ?', whereArgs: [nombre]);
+      eliminacion = await db.delete('categoria_ingreso', where: 'nombre = ? AND fk_id_presupuesto', whereArgs: [nombre, idPresupuesto]);
     } else if(tipo=='egreso') {
-      eliminacion = await db.delete('categoria_egreso', where: 'nombre = ?', whereArgs: [nombre]);
+      eliminacion = await db.delete('categoria_egreso', where: 'nombre = ? AND fk_id_presupuesto', whereArgs: [nombre, idPresupuesto]);
     } else {
       return false; // No se realizo insercion
     }
     return eliminacion>0 ? true : false;
   }
 
-  // Obtener lista ingresos del usuario
-  Future<List<Map<String, dynamic>>> obtenerIngresosTodos(String usuario) async {
+  // Obtener lista ingresos del usuario de un presupuesto
+  Future<List<Map<String, dynamic>>> obtenerIngresosTodos(String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario == null) {
+    if(datosUsuario.isEmpty) {
       // Si el usuario no existe
       return [];
     }
+    String consulta = 'SELECT i.id_ingreso AS id_ingreso, i.nombre AS nombre, i.monto AS monto, i.descripcion AS descripcion, i.fecha_registro AS fecha_registro, i.fk_id_usuario AS fk_id_usuario, i.fk_id_categoria_ingreso AS fk_id_categoria_ingreso'
+        ' FROM ingreso i JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ?';
 
-    return await db.query(
-      'ingreso',
-      where: 'fk_id_usuario = ?',
-      whereArgs: [datosUsuario['id_usuario']]
+    return await db.rawQuery(
+      consulta,
+      [datosUsuario['id_usuario'], idPresupuesto]
     );
   }
 
   // Obtener lista egresos del usuario
-  Future<List<Map<String, dynamic>>> obtenerEgresosTodos(String usuario) async {
+  Future<List<Map<String, dynamic>>> obtenerEgresosTodos(String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario == null) {
+    if(datosUsuario.isEmpty) {
       // Si el usuario no existe
       return [];
     }
+    String consulta = 'SELECT e.id_egreso AS id_egreso, e.nombre AS nombre, e.monto AS monto, e.descripcion AS descripcion, e.fecha_registro AS fecha_registro, e.fk_id_usuario AS fk_id_usuario, e.fk_id_categoria_egreso AS fk_id_categoria_egreso'
+        ' FROM egreso e JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ?';
 
-    return await db.query(
-        'egreso',
-        where: 'fk_id_usuario = ?',
-        whereArgs: [datosUsuario['id_usuario']]
+    return await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
     );
   }
 
   // Obtener top ingresos del usuario indicando cuantos elementos
-  Future<List<Map<String, dynamic>>> obtenerTopIngresos(String usuario, int numElementos) async {
+  Future<List<Map<String, dynamic>>> obtenerTopIngresos(String usuario, int idPresupuesto, int numElementos) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
@@ -322,66 +363,66 @@ class DataBaseOperaciones {
     }
 
     return await db.rawQuery(
-        'SELECT * FROM ingreso WHERE fk_id_usuario = ? ORDER BY monto DESC LIMIT ?',
-      [datosUsuario['id_usuario'], numElementos]
+        'SELECT i.id_ingreso AS id_ingreso, i.nombre AS nombre, i.monto AS monto, i.descripcion AS descripcion, i.fecha_registro AS fecha_registro, i.fk_id_usuario AS fk_id_usuario, i.fk_id_categoria_ingreso AS fk_id_categoria_ingreso'
+            ' FROM ingreso i JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto)'
+            ' WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ? ORDER BY i.monto DESC LIMIT ?',
+      [datosUsuario['id_usuario'], idPresupuesto, numElementos]
     );
   }
 
   // Obtener top egresos del usuario indicando cuantos elementos
-  Future<List<Map<String, dynamic>>> obtenerTopEgresos(String usuario, int numElementos) async {
+  Future<List<Map<String, dynamic>>> obtenerTopEgresos(String usuario, int idPresupuesto, int numElementos) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario == null) {
+    if(datosUsuario.isEmpty) {
       // Si el usuario no existe
       return [];
     }
 
     return await db.rawQuery(
-        'SELECT * FROM egreso WHERE fk_id_usuario = ? ORDER BY monto DESC LIMIT ?',
-        [datosUsuario['id_usuario'], numElementos]
+        'SELECT e.id_egreso AS id_egreso, e.nombre AS nombre, e.monto AS monto, e.descripcion AS descripcion, e.fecha_registro AS fecha_registro, e.fk_id_usuario AS fk_id_usuario, e.fk_id_categoria_egreso AS fk_id_categoria_egreso'
+            ' FROM egreso e JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto)'
+            ' WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ? ORDER BY e.monto DESC LIMIT ?',
+        [datosUsuario['id_usuario'], idPresupuesto, numElementos]
     );
   }
 
   // Obtener lista ingresos del usuario de una categoria
-  Future<List<Map<String, dynamic>>> obtenerIngresosCategoria(String usuario, String categoria) async {
+  Future<List<Map<String, dynamic>>> obtenerIngresosCategoria(String usuario, String categoria, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
-    final id_cat = await obtenerIdCategoria('ingreso', categoria);
+    final id_cat = await obtenerIdCategoria('ingreso', categoria, idPresupuesto);
 
-    if(datosUsuario==null || id_cat==null) {
+    if(datosUsuario.isEmpty || id_cat==null) {
       // Si el usuario no existe o la categoria no existe
       return [];
     }
 
-    return await db.query(
-        'ingreso',
-        where: 'fk_id_usuario = ? AND fk_id_categoria_ingreso = ?',
-        whereArgs: [
-          datosUsuario['id_usuario'],
-          id_cat
-        ]
+    return await db.rawQuery(
+      'SELECT i.id_ingreso AS id_ingreso, i.nombre AS nombre, i.monto AS monto, i.descripcion AS descripcion, i.fecha_registro AS fecha_registro, i.fk_id_usuario AS fk_id_usuario, i.fk_id_categoria_ingreso AS fk_id_categoria_ingreso'
+          ' FROM ingreso i JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto)'
+          ' WHERE i.fk_id_usuario = ? AND i.fk_id_categoria_ingreso = ? AND p.id_presupuesto = ?',
+      [datosUsuario['id_usuario'], id_cat, idPresupuesto]
     );
   }
 
   // Obtener lista egresos del usuario de una categoria
-  Future<List<Map<String, dynamic>>> obtenerEgresosCategoria(String usuario, String categoria) async {
+  Future<List<Map<String, dynamic>>> obtenerEgresosCategoria(String usuario, String categoria, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
-    final idCat = await obtenerIdCategoria('egreso', categoria);
+    final idCat = await obtenerIdCategoria('egreso', categoria, idPresupuesto);
 
-    if(datosUsuario==null || idCat==null) {
+    if(datosUsuario.isEmpty || idCat==null) {
       // Si el usuario no existe o la categoria no existe
       return [];
     }
 
-    return await db.query(
-        'egreso',
-        where: 'fk_id_usuario = ? AND fk_id_categoria_egreso = ?',
-        whereArgs: [
-          datosUsuario['id_usuario'],
-          idCat
-        ]
+    return await db.rawQuery(
+        'SELECT e.id_egreso AS id_egreso, e.nombre AS nombre, e.monto AS monto, e.descripcion AS descripcion, e.fecha_registro AS fecha_registro, e.fk_id_usuario AS fk_id_usuario, e.fk_id_categoria_egreso AS fk_id_categoria_egreso'
+            ' FROM egreso e JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto)'
+            ' WHERE e.fk_id_usuario = ? AND e.fk_id_categoria_egreso = ? AND p.id_presupuesto = ?',
+        [datosUsuario['id_usuario'], idCat, idPresupuesto]
     );
   }
 
@@ -390,7 +431,7 @@ class DataBaseOperaciones {
     final db = await database;
     final datosUsuario = await obtenerUsuario(nombreUsuario);
 
-    if(datosUsuario==null) {
+    if(datosUsuario.isEmpty) {
       // No se encontro el usuario (no se realiza la eliminacion)
       return false;
     } else {
@@ -415,7 +456,7 @@ class DataBaseOperaciones {
     final db = await database;
     final datosUsuario = await obtenerUsuario(nombreUsuario);
 
-    if(datosUsuario==null) {
+    if(datosUsuario.isEmpty) {
       // No se encontro el usuario (no se realiza la eliminacion)
       return false;
     } else {
@@ -436,7 +477,7 @@ class DataBaseOperaciones {
   }
 
   // Editar los datos de un ingreso
-  Future<bool> editarIngreso(int idIngreso, int fkId_Usuario, String nombreIngreso, double montoIngreso, String descripcionIngreso, String categoria) async {
+  Future<bool> editarIngreso(int idIngreso, int fkId_Usuario, String nombreIngreso, double montoIngreso, String descripcionIngreso, String categoria, int idPresupuesto) async {
     final db = await database;
     try {
       int cambios = await db.update(
@@ -445,7 +486,7 @@ class DataBaseOperaciones {
             'nombre': nombreIngreso,
             'monto': montoIngreso,
             'descripcion': descripcionIngreso,
-            'fk_id_categoria_ingreso': await obtenerIdCategoria('ingreso', categoria) ?? -1
+            'fk_id_categoria_ingreso': await obtenerIdCategoria('ingreso', categoria, idPresupuesto) ?? -1
           },
         where: 'id_ingreso = ? AND fk_id_usuario = ?',
         whereArgs: [idIngreso, fkId_Usuario]
@@ -457,7 +498,7 @@ class DataBaseOperaciones {
   }
 
   // Editar los datos de un egreso
-  Future<bool> editarEgreso(int idEgreso, int fkId_Usuario, String nombreEgreso, double montoEgreso, String descripcionEgreso, String categoria) async {
+  Future<bool> editarEgreso(int idEgreso, int fkId_Usuario, String nombreEgreso, double montoEgreso, String descripcionEgreso, String categoria, int idPresupuesto) async {
     final db = await database;
     try {
       int cambios = await db.update(
@@ -466,7 +507,7 @@ class DataBaseOperaciones {
             'nombre': nombreEgreso,
             'monto': montoEgreso,
             'descripcion': descripcionEgreso,
-            'fk_id_categoria_egreso': await obtenerIdCategoria('egreso', categoria) ?? -1
+            'fk_id_categoria_egreso': await obtenerIdCategoria('egreso', categoria, idPresupuesto) ?? -1
           },
           where: 'id_egreso = ? AND fk_id_usuario = ?',
           whereArgs: [idEgreso, fkId_Usuario]
@@ -479,7 +520,7 @@ class DataBaseOperaciones {
   }
 
   // Obtener la suma de los ingresos de un usuario
-  Future<Decimal> sumarIngresosTodos(String usuario) async {
+  Future<Decimal> sumarIngresosTodos(String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
@@ -487,8 +528,9 @@ class DataBaseOperaciones {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
-        const consulta = 'SELECT SUM(monto) AS suma FROM ingreso WHERE fk_id_usuario = ?';
-        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario']]);
+        const String consulta = 'SELECT SUM(i.monto) AS suma'
+            ' FROM ingreso i JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ?';
+        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idPresupuesto]);
 
         if(sumaTotal.isNotEmpty && sumaTotal.first['suma'] !=null) {
           return Decimal.parse(sumaTotal.first['suma'].toString());
@@ -503,16 +545,17 @@ class DataBaseOperaciones {
   }
 
   // Obtener la suma de los ingresos de un usuario
-  Future<Decimal> sumarEgresosTodos(String usuario) async {
+  Future<Decimal> sumarEgresosTodos(String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario==null) {
+    if(datosUsuario.isEmpty) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
-        const consulta = 'SELECT SUM(monto) AS suma FROM egreso WHERE fk_id_usuario = ?';
-        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario']]);
+        const String consulta = 'SELECT SUM(e.monto) AS suma'
+            ' FROM egreso e JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ?';
+        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idPresupuesto]);
 
         if(sumaTotal.isNotEmpty && sumaTotal.first['suma'] !=null) {
           return Decimal.parse(sumaTotal.first['suma'].toString());
@@ -527,17 +570,19 @@ class DataBaseOperaciones {
   }
 
   // Obtener la suma de los ingresos de un usuario de una categoria
-  Future<Decimal> sumarIngresosCategoria(String categoria, String usuario) async {
+  Future<Decimal> sumarIngresosCategoria(String categoria, String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
-    final idCat = await obtenerIdCategoria('ingreso', categoria);
+    final idCat = await obtenerIdCategoria('ingreso', categoria, idPresupuesto);
 
-    if(datosUsuario==null || idCat==null) {
+    if(datosUsuario.isEmpty || idCat==null) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
-        const consulta = 'SELECT SUM(monto) AS suma FROM ingreso WHERE fk_id_usuario = ? AND fk_id_categoria_ingreso = ?';
-        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idCat]);
+        const consulta = 'SELECT SUM(i.monto) AS suma'
+            ' FROM ingreso i JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto)'
+            ' WHERE i.fk_id_usuario = ? AND i.fk_id_categoria_ingreso = ? AND p.id_presupuesto = ?';
+        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idCat, idPresupuesto]);
 
         if(sumaTotal.isNotEmpty && sumaTotal.first['suma'] !=null) {
           return Decimal.parse(sumaTotal.first['suma'].toString());
@@ -552,17 +597,19 @@ class DataBaseOperaciones {
   }
 
   // Obtener la suma de los ingresos de un usuario de una categoria
-  Future<Decimal> sumarEgresosCategoria(String categoria, String usuario) async {
+  Future<Decimal> sumarEgresosCategoria(String categoria, String usuario, int idPresupuesto) async {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
-    final idCat = await obtenerIdCategoria('egreso', categoria);
+    final idCat = await obtenerIdCategoria('egreso', categoria, idPresupuesto);
 
     if(datosUsuario==null || idCat==null) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
-        const consulta = 'SELECT SUM(monto) AS suma FROM egreso WHERE fk_id_usuario = ? AND fk_id_categoria_egreso = ?';
-        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idCat]);
+        const consulta = 'SELECT SUM(e.monto) AS suma'
+            ' FROM egreso e JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto)'
+            ' WHERE e.fk_id_usuario = ? AND e.fk_id_categoria_egreso = ? AND p.id_presupuesto = ?';
+        final List<Map<String, dynamic>> sumaTotal = await db.rawQuery(consulta, [datosUsuario['id_usuario'], idCat, idPresupuesto]);
 
         if(sumaTotal.isNotEmpty && sumaTotal.first['suma'] !=null) {
           return Decimal.parse(sumaTotal.first['suma'].toString());

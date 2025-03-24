@@ -8,9 +8,10 @@ import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 
 
 class Ingresos extends StatefulWidget{
-  const Ingresos({super.key, required this.title, required this.usuario});
+  const Ingresos({super.key, required this.title, required this.usuario, required this.idPresupuesto});
   final String title;
   final String usuario;
+  final int idPresupuesto;
 
   @override
   State<Ingresos> createState() => _IngresosState();
@@ -49,7 +50,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
   // Obtener mi lista de categorias de ingresos para el tabController
   Future<void> _obtenerCategorias() async {
-    _categorias = await DataBaseOperaciones().obtenerCategorias("ingreso");
+    _categorias = await DataBaseOperaciones().obtenerCategorias("ingreso", widget.idPresupuesto);
     _tabController = TabController(length: _categorias.length+1, vsync: this);
 
     // Obtener suma del monto total por categoria
@@ -60,14 +61,14 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
   // Obtener la suma de los ingresos del usuario
   Future<void> _obtenerSumaIngresos() async {
-    final value = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario);
+    final value = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario, widget.idPresupuesto);
     _totalIngresosText = '+${value.toString()}';
     _totalIngresos = value;
   }
 
   // Obtener todos los datos de ingresos
   Future<void> _obtenerDatosIngresos() async {
-    _ingresosTodos = await DataBaseOperaciones().obtenerIngresosTodos(widget.usuario);
+    _ingresosTodos = await DataBaseOperaciones().obtenerIngresosTodos(widget.usuario, widget.idPresupuesto);
   }
 
 
@@ -91,7 +92,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
         totalIngresos: _totalIngresos,
         listaCategorias: _categorias,
         usuario: widget.usuario,
-        mostrarTotalIngresosCategoria: false
+        mostrarTotalIngresosCategoria: false,
+        idPresupuesto: widget.idPresupuesto,
       ),
     );
 
@@ -111,6 +113,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
             usuario: widget.usuario,
             mostrarTotalIngresosCategoria: true,
           nombreCategoria: categoria['nombre'],
+          idPresupuesto: widget.idPresupuesto,
         ),
       );
     }
@@ -123,7 +126,7 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
     Map<String, dynamic> sumaTotalPorCategorias = {};
     for(var categoria in listaCategorias) {
       // Obtener monto
-      Decimal monto = await DataBaseOperaciones().sumarIngresosCategoria(categoria['nombre'], widget.usuario);
+      Decimal monto = await DataBaseOperaciones().sumarIngresosCategoria(categoria['nombre'], widget.usuario, widget.idPresupuesto);
       // Guardar elemento
       sumaTotalPorCategorias[categoria['nombre']] = monto.toDouble();
     }
@@ -286,17 +289,37 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                       // Boton Agregar ingreso
                       MaterialButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CuadroDialogoAgregar(
-                                    tipo: 'ingreso',
-                                    listaCategorias: _categorias,
-                                    usuario: widget.usuario,
-                                    vistaDestino: Navegador(inicio: 0, usuario: widget.usuario),
-                                  );
-                                }
-                            );
+                            if(_categorias.isNotEmpty) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CuadroDialogoAgregar(
+                                      tipo: 'ingreso',
+                                      listaCategorias: _categorias,
+                                      usuario: widget.usuario,
+                                      vistaDestino: Navegador(inicio: 0, usuario: widget.usuario),
+                                      idPresupuesto: widget.idPresupuesto,
+                                    );
+                                  }
+                              );
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: const Text(
+                                          'Antes debe agregar una categoria para el ingreso.'
+                                      ),
+                                      actions: [
+                                        MaterialButton(
+                                          onPressed: () {Navigator.of(context).pop();},
+                                          child: const Text('Aceptar'),
+                                        )
+                                      ],
+                                    );
+                                  }
+                              );
+                            }
                           },
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -316,7 +339,8 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                                 builder: (BuildContext context) {
                                   return CuadroDialogoAgregarCategoria(
                                       tipo: 'ingreso',
-                                      usuario: widget.usuario
+                                      usuario: widget.usuario,
+                                      idPresupuesto: widget.idPresupuesto,
                                   );
                                 }
                             );

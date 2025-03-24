@@ -7,10 +7,10 @@ import 'package:calculadora_presupuesto/customWidgets/botones.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.usuario});
-
+  const MyHomePage({super.key, required this.title, required this.usuario, required this.idPresupuesto});
   final String title;
   final String usuario;
+  final int idPresupuesto;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -22,8 +22,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String _balanceGeneral = "+0";
   Decimal _sumaTotalIngresos = Decimal.zero;
   Decimal _sumaTotalEgresos = Decimal.zero;
-  String _mayorCategoriaIngresosNombre = '';
-  String _mayorCategoriaEgresosNombre = '';
+  String _mayorCategoriaIngresosNombre = 'Sin categoria';
+  String _mayorCategoriaEgresosNombre = 'Sin categoria';
   double _mayorCategoriaIngresosMonto = 0.0;
   double _mayorCategoriaEgresosMonto = 0.0;
   List<Map<String, dynamic>> _listaCategoriasIngreso = [];
@@ -51,14 +51,20 @@ class _MyHomePageState extends State<MyHomePage> {
       _obtenerBalance(), // Actualizar balace y valores de cantidades de ingresos y egresos
       _obtenerSumatoriaPorCategoriaIngresos(), // Obtener categoria con mayor numero de ingresos
       _obtenerSumatoriaPorCategoriaEgresos(),
-      _obtenerListaTopIngresosEgresos(3)
+      _obtenerListaTopIngresosEgresos(3),
     ]);
+  }
+
+  // PRUEBA
+  Future<void> _pruebaCARGA() async {
+    var prueba = await DataBaseOperaciones().obtenerCategorias('ingreso', widget.idPresupuesto);
+    print('PRESUPUESTOOOOS: $prueba');
   }
 
   // Obtiene o actualiza el valor del balance general
   Future<void> _obtenerBalance() async {
-    _sumaTotalIngresos = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario);
-    _sumaTotalEgresos = await DataBaseOperaciones().sumarEgresosTodos(widget.usuario);
+    _sumaTotalIngresos = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario, widget.idPresupuesto);
+    _sumaTotalEgresos = await DataBaseOperaciones().sumarEgresosTodos(widget.usuario, widget.idPresupuesto);
     Decimal balance = _sumaTotalIngresos - _sumaTotalEgresos;
 
     if(mounted) { // verificar que se siga mostrando la vista actual
@@ -87,11 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _obtenerSumatoriaPorCategoriaIngresos() async {
     
     // Obtener lista de categorias de ingresos
-    _listaCategoriasIngreso = await DataBaseOperaciones().obtenerCategorias('ingreso');
+    _listaCategoriasIngreso = await DataBaseOperaciones().obtenerCategorias('ingreso', widget.idPresupuesto);
 
     // Recorrer categorias para obtener sumatoria
     for(var categoria in _listaCategoriasIngreso) {
-      Decimal valor = await DataBaseOperaciones().sumarIngresosCategoria(categoria['nombre'], widget.usuario); // Obtener sumatoria de cada categoria
+      Decimal valor = await DataBaseOperaciones().sumarIngresosCategoria(categoria['nombre'], widget.usuario, widget.idPresupuesto); // Obtener sumatoria de cada categoria
       _listaCategoriasMontosIngresos[categoria['nombre']] = valor.toDouble();
     }
   }
@@ -100,31 +106,41 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _obtenerSumatoriaPorCategoriaEgresos() async {
 
     // Obtener lista de categorias de ingresos
-    _listaCategoriasEgreso = await DataBaseOperaciones().obtenerCategorias('egreso');
+    _listaCategoriasEgreso = await DataBaseOperaciones().obtenerCategorias('egreso', widget.idPresupuesto);
 
     // Recorrer categorias para obtener sumatoria
     for(var categoria in _listaCategoriasEgreso) {
-      Decimal valor = await DataBaseOperaciones().sumarEgresosCategoria(categoria['nombre'], widget.usuario); // Obtener sumatoria de cada categoria
+      Decimal valor = await DataBaseOperaciones().sumarEgresosCategoria(categoria['nombre'], widget.usuario, widget.idPresupuesto); // Obtener sumatoria de cada categoria
       _listaCategoriasMontosEgresos[categoria['nombre']] = valor.toDouble();
     }
   }
 
   // Obtener la categoria con mayor monto de Ingresos y Egresos
   void _obtenerMaxCategorias(Map<String, dynamic> listaIngresos, Map<String, dynamic> listaEgresos) {
-    // Ingresos
-    var maxIngresos = listaIngresos.entries.reduce((a, b) => a.value>b.value ? a : b);
-    _mayorCategoriaIngresosNombre = maxIngresos.value==0 ? 'Sin categoria' : maxIngresos.key;
-    _mayorCategoriaIngresosMonto = maxIngresos.value;
+    try {
+      // Ingresos
+      var maxIngresos = listaIngresos.entries.reduce((a, b) => a.value>b.value ? a : b);
+      _mayorCategoriaIngresosNombre = maxIngresos.value==0 ? 'Sin categoria' : maxIngresos.key;
+      _mayorCategoriaIngresosMonto = maxIngresos.value;
+    } catch (e) {
+      _mayorCategoriaIngresosNombre = 'Sin categoria';
+      _mayorCategoriaIngresosMonto = 0;
+    }
 
-    // Egresos
-    var maxEgresos = listaEgresos.entries.reduce((a, b) => a.value>b.value ? a : b);
-    _mayorCategoriaEgresosNombre = maxEgresos.value==0 ? 'Sin categoria' : maxEgresos.key;
-    _mayorCategoriaEgresosMonto = maxEgresos.value;
+    try {
+      // Egresos
+      var maxEgresos = listaEgresos.entries.reduce((a, b) => a.value>b.value ? a : b);
+      _mayorCategoriaEgresosNombre = maxEgresos.value==0 ? 'Sin categoria' : maxEgresos.key;
+      _mayorCategoriaEgresosMonto = maxEgresos.value;
+    } catch (e) {
+      _mayorCategoriaEgresosNombre = 'Sin categoria';
+      _mayorCategoriaEgresosMonto = 0;
+    }
   }
 
   Future<void> _obtenerListaTopIngresosEgresos(int numeroElementos) async {
-    _listaTopIngresos = await DataBaseOperaciones().obtenerTopIngresos(widget.usuario, numeroElementos);
-    _listaTopEgresos = await DataBaseOperaciones().obtenerTopEgresos(widget.usuario, numeroElementos);
+    _listaTopIngresos = await DataBaseOperaciones().obtenerTopIngresos(widget.usuario, widget.idPresupuesto, numeroElementos);
+    _listaTopEgresos = await DataBaseOperaciones().obtenerTopEgresos(widget.usuario, widget.idPresupuesto, numeroElementos);
   }
 
 
@@ -156,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
 
           } else if(snapshot.hasError) {
-            return Text("Ocurrio un error");
+            return Text("Ocurrio un error, ${snapshot.error}");
 
           } else {
             // Si cambio el tamaño del texto del balance (se construye hasta que FutureBuilder tiene datos)
@@ -398,7 +414,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 totalSumatoriaElementos: _sumaTotalIngresos,
                                 listaCategorias: _listaCategoriasIngreso,
                                 usuario: widget.usuario,
-                                mostrarTotalIngresosCategoria: false
+                                mostrarTotalIngresosCategoria: false,
+                                idPresupuesto: widget.idPresupuesto,
                             ),
 
                             // Categoria con mas egresos recuadro
@@ -472,7 +489,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 totalSumatoriaElementos: _sumaTotalEgresos,
                                 listaCategorias: _listaCategoriasEgreso,
                                 usuario: widget.usuario,
-                                mostrarTotalIngresosCategoria: false
+                                mostrarTotalIngresosCategoria: false,
+                                idPresupuesto: widget.idPresupuesto,
                             ),
 
 
@@ -492,17 +510,38 @@ class _MyHomePageState extends State<MyHomePage> {
                     left: MediaQuery.of(context).size.width * 0.075,
                     child: FloatingActionButton(
                       onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return CuadroDialogoAgregar(
+                        if(_listaCategoriasIngreso.isNotEmpty) { // Si no estan vacias las categorias se puede agregar ingreso
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CuadroDialogoAgregar(
                                   tipo: 'ingreso',
                                   listaCategorias: _listaCategoriasIngreso,
                                   usuario: widget.usuario,
                                   vistaDestino: Navegador(inicio: 1, usuario: widget.usuario),
-                              );
-                            }
-                        );
+                                  idPresupuesto: widget.idPresupuesto,
+                                );
+                              }
+                          );
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: const Text(
+                                      'Antes debe agregar una categoria para el ingreso.'
+                                  ),
+                                  actions: [
+                                    MaterialButton(
+                                        onPressed: () {Navigator.of(context).pop();},
+                                      child: const Text('Aceptar'),
+                                    )
+                                  ],
+                                );
+                              }
+                          );
+                        }
+
                       },
                       backgroundColor: const Color(0xFFd4fed7),
                       tooltip: 'Agregar ingreso',
@@ -518,17 +557,38 @@ class _MyHomePageState extends State<MyHomePage> {
                     right: MediaQuery.of(context).size.width * 0.0001,
                     child: FloatingActionButton(
                       onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return CuadroDialogoAgregar(
+                        if(_listaCategoriasEgreso.isNotEmpty) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CuadroDialogoAgregar(
                                   tipo: 'egreso',
                                   listaCategorias: _listaCategoriasEgreso,
                                   usuario: widget.usuario,
                                   vistaDestino: Navegador(inicio: 1, usuario: widget.usuario),
-                              );
-                            }
-                        );
+                                  idPresupuesto: widget.idPresupuesto,
+                                );
+                              }
+                          );
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: const Text(
+                                      'Antes debe agregar una categoria para el egreso.'
+                                  ),
+                                  actions: [
+                                    MaterialButton(
+                                      onPressed: () {Navigator.of(context).pop();},
+                                      child: const Text('Aceptar'),
+                                    )
+                                  ],
+                                );
+                              }
+                          );
+                        }
+
                       },
                       backgroundColor: const Color(0xffffdada),
                       tooltip: 'Agregar egreso',
