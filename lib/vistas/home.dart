@@ -55,12 +55,6 @@ class _MyHomePageState extends State<MyHomePage> {
     ]);
   }
 
-  // PRUEBA
-  Future<void> _pruebaCARGA() async {
-    var prueba = await DataBaseOperaciones().obtenerCategorias('ingreso', widget.idPresupuesto);
-    print('PRESUPUESTOOOOS: $prueba');
-  }
-
   // Obtiene o actualiza el valor del balance general
   Future<void> _obtenerBalance() async {
     _sumaTotalIngresos = await DataBaseOperaciones().sumarIngresosTodos(widget.usuario, widget.idPresupuesto);

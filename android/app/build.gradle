@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.victornietol.calculadora_presupuesto"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 34 //flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
