@@ -238,6 +238,58 @@ class DataBaseOperaciones {
     }
   }
 
+  // Insertar presupuestos, regresa el id del elemento insertado
+  Future<int> insertarPresupuesto(String nombrePresupuesto, String nombreUsuario) async {
+    final db = await database;
+    Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+    Map<String, dynamic> datos = {'nombre': nombrePresupuesto, 'fk_id_usuario': datosUsuario['id_usuario']};
+
+    try {
+      int idInsertado = await db.insert('presupuesto', datos);
+      return idInsertado>0 ? idInsertado : 0;
+    } catch (e) {
+      print("Error en la funcion insertarPresupuesto en databaseOperaciones.dart");
+      return 0;
+    }
+  }
+
+  // Eliminar presupuestos
+  Future<bool> eliminarPresupuesto(int idPresupuesto, int idUsuario) async {
+    final db = await database;
+
+    try {
+      int eliminaciones = await db.delete(
+        'presupuesto',
+        where: 'id_presupuesto = ? AND fk_id_usuario = ?',
+        whereArgs: [idPresupuesto, idUsuario]
+      );
+      return eliminaciones>0 ? true : false;
+    } catch (e) {
+      print("Error en la funcion eliminarPresupuesto en databaseOperaciones.dart");
+      return false;
+    }
+  }
+
+  // Editar presupuestos
+  Future<bool> editarPresupuesto(int idPresupuesto, String nombrePresupuesto, int fkUsuario) async {
+    final db = await database;
+
+    try {
+      int actualizaciones = await db.update(
+          'presupuesto',
+        {
+          'nombre': nombrePresupuesto,
+        },
+        where: 'id_presupuesto = ? AND fk_id_usuario = ?',
+        whereArgs: [idPresupuesto, fkUsuario]
+      );
+      return actualizaciones>0 ? true : false;
+    } catch (e) {
+      print("Error en la funcion editarPresupuesto en databaseOperaciones.dart");
+      return false;
+    }
+  }
+
   // Obtener presupuestos de un usuario
   Future<List<Map<String, dynamic>>> obtenerPresupuestos(String nombreUsuario) async {
     Map<String, dynamic> datosUser = await obtenerUsuario(nombreUsuario);
@@ -307,9 +359,9 @@ class DataBaseOperaciones {
     int eliminacion = 0;
 
     if(tipo=='ingreso') {
-      eliminacion = await db.delete('categoria_ingreso', where: 'nombre = ? AND fk_id_presupuesto', whereArgs: [nombre, idPresupuesto]);
+      eliminacion = await db.delete('categoria_ingreso', where: 'nombre = ? AND fk_id_presupuesto = ?', whereArgs: [nombre, idPresupuesto]);
     } else if(tipo=='egreso') {
-      eliminacion = await db.delete('categoria_egreso', where: 'nombre = ? AND fk_id_presupuesto', whereArgs: [nombre, idPresupuesto]);
+      eliminacion = await db.delete('categoria_egreso', where: 'nombre = ? AND fk_id_presupuesto = ?', whereArgs: [nombre, idPresupuesto]);
     } else {
       return false; // No se realizo insercion
     }

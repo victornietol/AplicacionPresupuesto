@@ -1657,3 +1657,400 @@ class GraficaRadialBarState extends State<GraficaRadialBar> {
     );
   }
 }
+
+
+
+// Cuadro de de dialogo para agregar un nuevo presupuesto
+class CuadroDialogoAgregarPresupuesto extends StatefulWidget {
+  const CuadroDialogoAgregarPresupuesto({super.key,
+    required this.usuario,
+  });
+  final String usuario;
+
+  @override
+  State<CuadroDialogoAgregarPresupuesto> createState() => _CuadroDialogoAgregarPresupuestoState();
+}
+
+class _CuadroDialogoAgregarPresupuestoState extends State<CuadroDialogoAgregarPresupuesto> {
+  TextEditingController _nombreTEC = TextEditingController();
+  String? _mensajeErrorGuardar;
+  int? _idInsertado;
+
+
+  Future<bool> _guardarDatos(String nombrePresupuesto) async {
+    if(nombrePresupuesto.isEmpty || nombrePresupuesto.trim().isEmpty) {
+      _mensajeErrorGuardar = "Campo vacio.";
+      return false;
+    } else {
+      try {
+        _idInsertado = await DataBaseOperaciones().insertarPresupuesto(nombrePresupuesto, widget.usuario);
+        return _idInsertado!>0 ? true : false; // Si se devuelve id valido significa que se inserto
+      } catch (e) {
+        if(e.toString().contains('UNIQUE constraint failed')) {
+          _mensajeErrorGuardar = 'El nombre de presupuesto ya existe.';
+          return false;
+        } else {
+          _mensajeErrorGuardar = 'No se pudo realizar la carga.';
+          return false;
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: SingleChildScrollView(
+        child: Container(
+          //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: const Text(
+                  'Nuevo presupuesto',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                  ),
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20,),
+              TextField(
+                readOnly: false,
+                controller: _nombreTEC,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Nombre del presupuesto',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20,),
+
+              // Botones
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MaterialButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.grey,
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                            color: Colors.black
+                        ),
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        _guardarDatos(_nombreTEC.text).then((cargaCorrecta) {
+                          if(cargaCorrecta) {
+                            // Si la carga se realizo se manda a la vista con ese presupuesto nuevo
+                            Navigator.of(context).pop();
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Navegador(inicio: 1, usuario: widget.usuario, idPresupuesto: _idInsertado)),
+                                  (Route<dynamic> route) => false,
+                            );
+                          } else {
+                            // Falla la carga
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Error'),
+                                    content: Text(_mensajeErrorGuardar ?? 'Ocurrio un error.'),
+                                    actions: [
+                                      MaterialButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('Aceptar'),
+                                      ),
+                                    ],
+                                  );
+                                }
+                            );
+                          }
+                        });
+                      },
+                      color: const Color(0xFF02013C),
+                      child: const Text(
+                        'Agregar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+// Cuadro de de dialogo para editar un presupuesto
+class CuadroDialogoEditarPresupuesto extends StatefulWidget {
+  const CuadroDialogoEditarPresupuesto({super.key,
+    required this.usuario,
+    required this.presupuesto,
+  });
+  final String usuario;
+  final Map<String, dynamic> presupuesto;
+
+  @override
+  State<CuadroDialogoEditarPresupuesto> createState() => _CuadroDialogoEditarPresupuestoState();
+}
+
+class _CuadroDialogoEditarPresupuestoState extends State<CuadroDialogoEditarPresupuesto> {
+  TextEditingController _nombreTEC = TextEditingController();
+  String? _mensajeErrorGuardar;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombreTEC = TextEditingController(text: widget.presupuesto['nombre']);
+  }
+
+  Future<bool> _guardarDatos(String nombrePresupuesto) async {
+    if(nombrePresupuesto.isEmpty || nombrePresupuesto.trim().isEmpty) {
+      _mensajeErrorGuardar = "Campo vacio.";
+      return false;
+    } else {
+      try {
+        return await DataBaseOperaciones().editarPresupuesto(widget.presupuesto['id_presupuesto'], nombrePresupuesto, widget.presupuesto['fk_id_usuario']);
+      } catch (e) {
+        if(e.toString().contains('UNIQUE constraint failed')) {
+          _mensajeErrorGuardar = 'El nombre de presupuesto ya existe.';
+          return false;
+        } else {
+          _mensajeErrorGuardar = 'No se pudo realizar la carga.';
+          return false;
+        }
+      }
+    }
+  }
+
+  Future<bool> _eliminarPresupuesto(Map<String, dynamic> presupuesto) async {
+    return await DataBaseOperaciones().eliminarPresupuesto(presupuesto['id_presupuesto'], presupuesto['fk_id_usuario']);
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)
+      ),
+      child: SingleChildScrollView(
+        child: Container(
+          //height: MediaQuery.of(context).size.height,// Altura de la pantalla
+          width: MediaQuery.of(context).size.width, //Ancho de la pantalla
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: const Text(
+                  'Editar presupuesto',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                  ),
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20,),
+              TextField(
+                readOnly: false,
+                controller: _nombreTEC,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Nombre del presupuesto',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20,),
+
+              // Botones
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)*0.04 ), // Separacion de los botones
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    MaterialButton( // Boton eliminar
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: const Text('¿Estas seguro de eliminar el elemento?'),
+                                  actions: [
+                                    MaterialButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    MaterialButton(
+                                      onPressed: () {
+                                        _eliminarPresupuesto(widget.presupuesto).then((eliminacionCorrecta) {
+                                          if(eliminacionCorrecta) {
+                                            Navigator.of(context).pop();
+                                            Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) => Navegador(inicio: 1, usuario: widget.usuario, idPresupuesto: 1)),
+                                                  (Route<dynamic> route) => false,
+                                            );
+                                          } else {
+                                            // Falla la eliminacion
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                    content: const Text('No se pudo eliminar.'),
+                                                    actions: [
+                                                      MaterialButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop();
+                                                          Navigator.of(context).pop();
+                                                        },
+                                                        child: const Text(
+                                                          'Aceptar',
+                                                          style: TextStyle(
+                                                              color: Colors.indigo
+                                                          ),
+                                                          softWrap: true,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                }
+                                            );
+                                          }
+                                        });
+                                      },
+                                      child: const Text('Confirmar'),
+                                    ),
+                                  ],
+                                );
+                              }
+                          );
+                        },
+                      minWidth: 20,
+                      color: Colors.red,
+                      child: const Icon(
+                        Icons.delete_forever_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.grey,
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                            color: Colors.black
+                        ),
+                      ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content: const Text('¿Esta seguro de guardar los cambios?'),
+                                actions: [
+                                  MaterialButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                  // Guardar
+                                  MaterialButton(
+                                    onPressed: () {
+                                      _guardarDatos(_nombreTEC.text).then((cargaCorrecta) {
+                                        if(cargaCorrecta) {
+                                          // Si la carga se realizo se manda a la vista con ese presupuesto nuevo
+                                          Navigator.of(context).pop();
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Navegador(inicio: 1, usuario: widget.usuario, idPresupuesto: widget.presupuesto['id_presupuesto'])),
+                                                (Route<dynamic> route) => false,
+                                          );
+                                        } else {
+                                          // Falla la carga
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('Error'),
+                                                  content: Text(_mensajeErrorGuardar ?? 'Ocurrio un error.'),
+                                                  actions: [
+                                                    MaterialButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      child: const Text(
+                                                          'Aceptar',
+                                                        style: TextStyle(
+                                                          color: Colors.indigo
+                                                        ),
+                                                        softWrap: true,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              }
+                                          );
+                                        }
+                                      });
+                                    },
+                                    child: const Text('Aceptar'),
+                                  ),
+                                ],
+                              );
+                            }
+                        );
+                      },
+                      color: const Color(0xFF02013C),
+                      child: const Text(
+                        'Guardar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

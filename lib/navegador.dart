@@ -3,6 +3,7 @@ import 'package:calculadora_presupuesto/vistas/home.dart';
 import 'package:calculadora_presupuesto/vistas/egresos.dart';
 import 'package:calculadora_presupuesto/vistas/ingresos.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
+import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Navegador extends StatefulWidget{
@@ -92,6 +93,17 @@ class _NavegadorState extends State<Navegador>{
                   (Route<dynamic> route) => false,
             );
           },
+          trailing: IconButton(
+            icon: Icon(Icons.edit, size: 20),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CuadroDialogoEditarPresupuesto(usuario: widget.usuario, presupuesto: elemento);
+                  }
+              );
+            },
+          ),
         ),
       );
     }
@@ -175,10 +187,13 @@ class _NavegadorState extends State<Navegador>{
                           leading: Icon(Icons.home),
                           title: Text('Inicio'),
                           onTap: () {
-                            // Agregar acción al seleccionar este ítem
-                            Navigator.pop(context);  // Cierra el drawer
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Navegador(inicio: 1, usuario: widget.usuario)),
+                                  (Route<dynamic> route) => false,
+                            );
                           },
-
                         ),
                         ListTile(
                           leading: Icon(Icons.account_circle),
@@ -201,7 +216,7 @@ class _NavegadorState extends State<Navegador>{
                             Navigator.pop(context);
                           },
                         ),
-                        ExpansionTile(
+                        ExpansionTile( // Boton que muestra una lista de botones
                           title: const Text('Presupuestos'),
                           leading: Icon(Icons.attach_money_outlined),
                           children: _listTiles,
@@ -225,7 +240,12 @@ class _NavegadorState extends State<Navegador>{
                       // Boton de agregar Presupuesto
                       IconButton(
                           onPressed: () {
-                            print('Nuevo presupuesto');
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CuadroDialogoAgregarPresupuesto(usuario: widget.usuario);
+                                }
+                            );
                           },
                           icon: const Icon(Icons.create_new_folder)
                       ),

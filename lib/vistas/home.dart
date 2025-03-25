@@ -523,7 +523,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   content: const Text(
-                                      'Antes debe agregar una categoria para el ingreso.'
+                                      'Antes debe agregar una categoria para el ingreso en la seccion "Ingresos".'
                                   ),
                                   actions: [
                                     MaterialButton(
@@ -570,7 +570,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   content: const Text(
-                                      'Antes debe agregar una categoria para el egreso.'
+                                      'Antes debe agregar una categoria para el egreso en la seccion "Egresos".'
                                   ),
                                   actions: [
                                     MaterialButton(
