@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/vistas/home.dart';
 import 'package:calculadora_presupuesto/vistas/egresos.dart';
 import 'package:calculadora_presupuesto/vistas/ingresos.dart';
+import 'package:calculadora_presupuesto/vistas/bienvenido.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +42,10 @@ class _NavegadorState extends State<Navegador>{
   // Funcion para ejecutar y esperar el resultado de las funcion asincronas que cargan datos
   Future<void> _cargarDatosVista() async {
     final lista = await _obtenerPresupuestos();
-    await _obtenerIdPresupuesto(lista);
+    if(lista.isNotEmpty) {
+      // Si la lista contiene minimo un presupuesto se muestra, de lo contrario no se busca id de presupuesto
+      await _obtenerIdPresupuesto(lista);
+    }
   }
 
   Future<List<Map<String, dynamic>>> _obtenerPresupuestos() async {
@@ -49,6 +53,7 @@ class _NavegadorState extends State<Navegador>{
     return _listaPresupuestos;
   }
 
+  // Asignar el id del presupuesto a mostrar al cargar la vista de inicio
   Future<void> _obtenerIdPresupuesto(List<Map<String, dynamic>> lista) async {
     final SharedPreferences prefs = await _prefs;
 
@@ -86,12 +91,15 @@ class _NavegadorState extends State<Navegador>{
         ListTile(
           title: Text(elemento['nombre'][0].toUpperCase()+elemento['nombre'].substring(1)),
           onTap: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Navegador(inicio: 1, usuario: widget.usuario, idPresupuesto: elemento['id_presupuesto'])),
-                  (Route<dynamic> route) => false,
-            );
+            Navigator.of(context).pop();
+            Future.delayed(const Duration(milliseconds: 150), () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Navegador(inicio: 1, usuario: widget.usuario, idPresupuesto: elemento['id_presupuesto'])),
+                    (Route<dynamic> route) => false,
+              );
+            });
           },
           trailing: IconButton(
             icon: Icon(Icons.edit, size: 20),
@@ -130,154 +138,300 @@ class _NavegadorState extends State<Navegador>{
             return Text('Ocurrio un error');
 
           } else {
-            // Se construyen las vistas hasta que hayan cargado los datos
-            _vistas.add(
-                Ingresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
-            );
-            _vistas.add(
-                MyHomePage(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
-            );
-            _vistas.add(
-                Egresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
-            );
 
-            // Crear elementos del menu lateral desplegable
-            _crearListTiles();
-            String nombrePresupuesto = _obtenerNombrePresupuestoActual();
+            if(_listaPresupuestos.isNotEmpty) {
+              // Si hay al menos un presupuesto se cargan las vistas Home, Ingresos, Egresos
+              // Se construyen las vistas hasta que hayan cargado los datos
+              _vistas.add(
+                  Ingresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
+              );
+              _vistas.add(
+                  MyHomePage(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
+              );
+              _vistas.add(
+                  Egresos(title: _titulos[_indice], usuario: widget.usuario, idPresupuesto: _idPresupuesto)
+              );
 
-            return Stack(
-              children: [
-                Scaffold(
-                  drawer: Drawer( // Menu lateral desplegable
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: <Widget>[
-                        DrawerHeader(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF02013C),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 5,),
-                              const Text(
-                                'Mostrando el presupuesto:',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.normal
+              // Crear elementos del menu lateral desplegable
+              _crearListTiles();
+              String nombrePresupuesto = _obtenerNombrePresupuestoActual();
+              return Stack(
+                children: [
+                  Scaffold(
+                    drawer: Drawer( // Menu lateral desplegable
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: <Widget>[
+                          DrawerHeader(
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF02013C),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5,),
+                                const Text(
+                                  'Mostrando el presupuesto:',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.normal
+                                  ),
+                                  softWrap: true,
                                 ),
-                                softWrap: true,
-                              ),
-                              const SizedBox(height: 5,),
-                              Text(
-                                nombrePresupuesto[0].toUpperCase()+nombrePresupuesto.substring(1),
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold
+                                const SizedBox(height: 5,),
+                                Text(
+                                  nombrePresupuesto[0].toUpperCase()+nombrePresupuesto.substring(1),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold
+                                  ),
+                                  softWrap: true,
                                 ),
-                                softWrap: true,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          ListTile(
+                            leading: Icon(Icons.home),
+                            title: Text('Inicio'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Future.delayed(const Duration(milliseconds: 150), () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Navegador(inicio: 1, usuario: widget.usuario)),
+                                      (Route<dynamic> route) => false,
+                                );
+                              });
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.account_circle),
+                            title: Text('Perfil'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.settings),
+                            title: Text('Ajustes'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.exit_to_app),
+                            title: Text('Cerrar sesión'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ExpansionTile( // Boton que muestra una lista de botones
+                            title: const Text('Presupuestos'),
+                            leading: Icon(Icons.attach_money_outlined),
+                            children: _listTiles,
+                          ),
+                        ],
+                      ),
+
+                    ),
+                    appBar: AppBar(
+                      title: Text(
+                        _titulos[_indice],
+                        style: const TextStyle(
+                            color: Colors.white,
+                            letterSpacing: 1.0
                         ),
-                        ListTile(
-                          leading: Icon(Icons.home),
-                          title: Text('Inicio'),
-                          onTap: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Navegador(inicio: 1, usuario: widget.usuario)),
-                                  (Route<dynamic> route) => false,
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.account_circle),
-                          title: Text('Perfil'),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.settings),
-                          title: Text('Ajustes'),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.exit_to_app),
-                          title: Text('Cerrar sesión'),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        ExpansionTile( // Boton que muestra una lista de botones
-                          title: const Text('Presupuestos'),
-                          leading: Icon(Icons.attach_money_outlined),
-                          children: _listTiles,
+                      ),
+                      centerTitle: true,
+                      backgroundColor: const Color(0xFF02013C),
+                      iconTheme: const IconThemeData(color: Colors.white), // Color del icono
+                      actions: <Widget>[
+                        // Boton de agregar Presupuesto
+                        IconButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CuadroDialogoAgregarPresupuesto(usuario: widget.usuario);
+                                  }
+                              );
+                            },
+                            icon: const Icon(Icons.create_new_folder)
                         ),
                       ],
                     ),
-
-                  ),
-                  appBar: AppBar(
-                    title: Text(
-                      _titulos[_indice],
-                      style: const TextStyle(
-                          color: Colors.white,
-                          letterSpacing: 1.0
-                      ),
+                    body: _vistas[_indice],
+                    bottomNavigationBar: BottomNavigationBar(
+                      type: BottomNavigationBarType.fixed,
+                      currentIndex: _indice,
+                      onTap: (value) {
+                        setState(() {
+                          _indice = value;
+                        });
+                      },
+                      items: [
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.trending_up_outlined),
+                            label: "Ingresos"
+                        ),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.home_filled),
+                            label: "Inicio"
+                        ),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.trending_down_outlined),
+                            label: "Egresos"
+                        ),
+                      ],
                     ),
-                    centerTitle: true,
-                    backgroundColor: const Color(0xFF02013C),
-                    iconTheme: const IconThemeData(color: Colors.white), // Color del icono
-                    actions: <Widget>[
-                      // Boton de agregar Presupuesto
-                      IconButton(
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CuadroDialogoAgregarPresupuesto(usuario: widget.usuario);
-                                }
-                            );
-                          },
-                          icon: const Icon(Icons.create_new_folder)
-                      ),
-                    ],
                   ),
-                  body: _vistas[_indice],
-                  bottomNavigationBar: BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    currentIndex: _indice,
-                    onTap: (value) {
-                      setState(() {
-                        _indice = value;
-                      });
-                    },
-                    items: [
-                      BottomNavigationBarItem(
-                          icon: Icon(Icons.trending_up_outlined),
-                          label: "Ingresos"
+                ],
+              );
+
+            } else {
+              // Si despues de cargar la informacion no se encuentran presupuestos se manda a una vista especifica
+              return Stack(
+                children: [
+                  Scaffold(
+                    drawer: Drawer( // Menu lateral desplegable
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: <Widget>[
+                          DrawerHeader(
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF02013C),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5,),
+                                const Text(
+                                  'Hola,',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.normal
+                                  ),
+                                  softWrap: true,
+                                ),
+                                const SizedBox(height: 5,),
+                                Text(
+                                  'Bienvenido',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold
+                                  ),
+                                  softWrap: true,
+                                ),
+                              ],
+                            ),
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.home),
+                            title: Text('Inicio'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Future.delayed(const Duration(milliseconds: 150), () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Navegador(inicio: 1, usuario: widget.usuario)),
+                                      (Route<dynamic> route) => false,
+                                );
+                              });
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.account_circle),
+                            title: Text('Perfil'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ExpansionTile( // Boton que muestra una lista de botones
+                            title: const Text('Presupuestos'),
+                            leading: Icon(Icons.attach_money_outlined),
+                            children: [
+                              ListTile(
+                                leading: const Icon(
+                                    Icons.add_circle_outlined,
+                                  color: Colors.grey,
+                                ),
+                                title: const Text('Agregar presupuesto'),
+                                onTap: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return CuadroDialogoAgregarPresupuesto(usuario: widget.usuario);
+                                      }
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      BottomNavigationBarItem(
-                          icon: Icon(Icons.home_filled),
-                          label: "Inicio"
+
+                    ),
+                    appBar: AppBar(
+                      title: const Text(
+                        'Bienvenido',
+                        style: TextStyle(
+                            color: Colors.white,
+                            letterSpacing: 1.0
+                        ),
                       ),
-                      BottomNavigationBarItem(
-                          icon: Icon(Icons.trending_down_outlined),
-                          label: "Egresos"
-                      ),
-                    ],
+                      centerTitle: true,
+                      backgroundColor: const Color(0xFF02013C),
+                      iconTheme: const IconThemeData(color: Colors.white), // Color del icono
+                      actions: <Widget>[
+                        // Boton de agregar Presupuesto
+                        IconButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return CuadroDialogoAgregarPresupuesto(usuario: widget.usuario);
+                                  }
+                              );
+                            },
+                            icon: const Icon(Icons.create_new_folder)
+                        ),
+                      ],
+                    ),
+                    body: const Bienvenido(title: 'Bienvenido'),
+                    bottomNavigationBar: BottomNavigationBar(
+                      type: BottomNavigationBarType.fixed,
+                      currentIndex: 1,
+                      onTap: (value) {
+
+                      },
+                      items: [
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.trending_up_outlined),
+                            label: "Ingresos"
+                        ),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.home_filled),
+                            label: "Inicio"
+                        ),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.trending_down_outlined),
+                            label: "Egresos"
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
+                ],
+              );
+            }
+
           }
         }
     );

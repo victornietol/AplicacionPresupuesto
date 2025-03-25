@@ -71,7 +71,7 @@ class DataBaseOperaciones {
           await txn.execute('''
             CREATE TABLE presupuesto (
               id_presupuesto INTEGER PRIMARY KEY AUTOINCREMENT,
-              nombre TEXT NOT NULL,
+              nombre TEXT NOT NULL UNIQUE,
               fk_id_usuario INTEGER,
               FOREIGN KEY (fk_id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE ON UPDATE CASCADE
             )
@@ -81,7 +81,7 @@ class DataBaseOperaciones {
           await txn.execute('''
             CREATE TABLE categoria_egreso (
               id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
-              nombre TEXT NOT NULL UNIQUE,
+              nombre TEXT NOT NULL,
               fk_id_presupuesto INTEGER,
               FOREIGN KEY (fk_id_presupuesto) REFERENCES presupuesto(id_presupuesto) ON DELETE CASCADE ON UPDATE CASCADE,
               UNIQUE (nombre, fk_id_presupuesto)
@@ -92,7 +92,7 @@ class DataBaseOperaciones {
           await txn.execute('''
             CREATE TABLE categoria_ingreso (
               id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
-              nombre TEXT NOT NULL UNIQUE,
+              nombre TEXT NOT NULL,
               fk_id_presupuesto INTEGER,
               FOREIGN KEY (fk_id_presupuesto) REFERENCES presupuesto(id_presupuesto) ON DELETE CASCADE ON UPDATE CASCADE,
               UNIQUE (nombre, fk_id_presupuesto)
@@ -136,7 +136,7 @@ class DataBaseOperaciones {
                 'fecha_registro': DateTime.now().toIso8601String()
               }
           );
-
+/*
           // Insertar presupuesto inicial
           await txn.insert('presupuesto',
               {'nombre':'inicial',
@@ -144,7 +144,7 @@ class DataBaseOperaciones {
               }
           );
 
-/*
+
           // Insertar categorias ingresos
           for(var ingreso in categorias_ingresos) {
             await txn.insert('categoria_ingreso', ingreso);
@@ -242,15 +242,10 @@ class DataBaseOperaciones {
   Future<int> insertarPresupuesto(String nombrePresupuesto, String nombreUsuario) async {
     final db = await database;
     Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
-    Map<String, dynamic> datos = {'nombre': nombrePresupuesto, 'fk_id_usuario': datosUsuario['id_usuario']};
+    Map<String, dynamic> datos = {'nombre': nombrePresupuesto.trimRight(), 'fk_id_usuario': datosUsuario['id_usuario']};
 
-    try {
-      int idInsertado = await db.insert('presupuesto', datos);
-      return idInsertado>0 ? idInsertado : 0;
-    } catch (e) {
-      print("Error en la funcion insertarPresupuesto en databaseOperaciones.dart");
-      return 0;
-    }
+    int idInsertado = await db.insert('presupuesto', datos);
+    return idInsertado>0 ? idInsertado : 0;
   }
 
   // Eliminar presupuestos
@@ -278,7 +273,7 @@ class DataBaseOperaciones {
       int actualizaciones = await db.update(
           'presupuesto',
         {
-          'nombre': nombrePresupuesto,
+          'nombre': nombrePresupuesto.trimRight(),
         },
         where: 'id_presupuesto = ? AND fk_id_usuario = ?',
         whereArgs: [idPresupuesto, fkUsuario]
@@ -340,12 +335,12 @@ class DataBaseOperaciones {
     if(tipo=='ingreso') {
       insercion = await db.insert(
           'categoria_ingreso', // tabla
-          {'nombre': nombre, 'fk_id_presupuesto': idPresupuesto} // campo
+          {'nombre': nombre.trimRight(), 'fk_id_presupuesto': idPresupuesto} // campo
       );
     } else if(tipo=='egreso') {
       insercion = await db.insert(
           'categoria_egreso', // tabla
-          {'nombre': nombre, 'fk_id_presupuesto': idPresupuesto} // campo
+          {'nombre': nombre.trimRight(), 'fk_id_presupuesto': idPresupuesto} // campo
       );
     } else {
       return false; // No se realizo insercion

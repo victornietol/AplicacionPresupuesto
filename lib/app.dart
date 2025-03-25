@@ -1,6 +1,5 @@
 import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:flutter/material.dart';
-import 'package:calculadora_presupuesto/vistas/home.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
