@@ -3,6 +3,7 @@ import 'package:calculadora_presupuesto/vistas/home.dart';
 import 'package:calculadora_presupuesto/vistas/egresos.dart';
 import 'package:calculadora_presupuesto/vistas/ingresos.dart';
 import 'package:calculadora_presupuesto/vistas/bienvenido.dart';
+import 'package:calculadora_presupuesto/vistas/visualizacionGraficas.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,6 +28,7 @@ class _NavegadorState extends State<Navegador>{
   final List _titulos = ['Ingresos', 'Resumen Presupuesto', 'Egresos'];
   int _idPresupuesto = 1;
   final List<Widget> _listTiles = [];
+  final List<Widget> _listTilesGraficas = [];
   List<Map<String, dynamic>> _listaPresupuestos = [];
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late Future<void> _cargaInicial; // Indicar la carga inicial de datos
@@ -117,6 +119,29 @@ class _NavegadorState extends State<Navegador>{
     }
   }
 
+  // Funcion para construir los ListTile de graficas para los presupuestos existentes
+  void _crearListTilesGraficas() {
+    _listTilesGraficas.clear();
+    // Recorrer los presupuestos
+    for(var elemento in _listaPresupuestos) {
+      _listTilesGraficas.add(
+        ListTile(
+          title: Text(elemento['nombre'][0].toUpperCase()+elemento['nombre'].substring(1)),
+          onTap: () {
+            Navigator.of(context).pop();
+            Future.delayed(const Duration(milliseconds: 150), () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => VisualizacionGraficas(title: 'Graficas', usuario: widget.usuario, presupuesto: elemento)),
+              );
+            });
+          },
+        ),
+      );
+    }
+  }
+
   // Funcion para obtener el titulo del presupuesto actual
   String _obtenerNombrePresupuestoActual() {
     for(var elemento in _listaPresupuestos) {
@@ -154,6 +179,7 @@ class _NavegadorState extends State<Navegador>{
 
               // Crear elementos del menu lateral desplegable
               _crearListTiles();
+              _crearListTilesGraficas();
               String nombrePresupuesto = _obtenerNombrePresupuestoActual();
               return Stack(
                 children: [
@@ -215,12 +241,10 @@ class _NavegadorState extends State<Navegador>{
                               Navigator.pop(context);
                             },
                           ),
-                          ListTile(
-                            leading: Icon(Icons.settings),
-                            title: Text('Ajustes'),
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
+                          ExpansionTile( // Boton que muestra una lista de botones
+                            title: const Text('Graficas'),
+                            leading: Icon(Icons.bar_chart),
+                            children: _listTilesGraficas,
                           ),
                           ListTile(
                             leading: Icon(Icons.exit_to_app),

@@ -670,4 +670,80 @@ class DataBaseOperaciones {
     }
   }
 
+  // Obtener sumatoria de los ingresos de un dia de la semana de un presupuesto
+  Future<double> obtenerSumatoriaIngresosUnDiaPresupuesto(int indiceDia, int idPresupuesto, String nombreUsuario) async {
+    /*
+    0 -> domingo, 1 -> lunes, 2 -> martes, 3 -> miercoles, 4 ->jueves, 5 ->viernes, 6 -> sabado
+     */
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = "SELECT SUM(i.monto) AS suma "
+        "FROM ingreso i "
+        "JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) "
+        "WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ? AND strftime('%w', substr(i.fecha_registro, 1, 10)) = ?";
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+      consulta,
+      [datosUsuario['id_usuario'], idPresupuesto, indiceDia]
+    );
+
+    return resultado.first['suma'];
+  }
+
+  // Obtener sumatoria de los ingresos de los 7 dias de la semana de un presupuesto
+  Future<Map<String, dynamic>> obtenerSumatoriaIngresosDiasSemanaPresupuesto(int idPresupuesto, String nombreUsuario) async {
+    /*
+    0 -> domingo, 1 -> lunes, 2 -> martes, 3 -> miercoles, 4 ->jueves, 5 ->viernes, 6 -> sabado
+     */
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = "SELECT "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '0' THEN i.monto ELSE 0 END) AS domingo, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '1' THEN i.monto ELSE 0 END) AS lunes, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '2' THEN i.monto ELSE 0 END) AS martes, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '3' THEN i.monto ELSE 0 END) AS miercoles, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '4' THEN i.monto ELSE 0 END) AS jueves, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '5' THEN i.monto ELSE 0 END) AS viernes, "
+        "SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '6' THEN i.monto ELSE 0 END) AS sabado "
+        "FROM ingreso i "
+        "JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) "
+        "WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ?";
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Obtener sumatoria de los egresos de los 7 dias de la semana de un presupuesto
+  Future<Map<String, dynamic>> obtenerSumatoriaEgresosDiasSemanaPresupuesto(int idPresupuesto, String nombreUsuario) async {
+    /*
+    0 -> domingo, 1 -> lunes, 2 -> martes, 3 -> miercoles, 4 ->jueves, 5 ->viernes, 6 -> sabado
+     */
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = "SELECT "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '0' THEN e.monto ELSE 0 END) AS domingo, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '1' THEN e.monto ELSE 0 END) AS lunes, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '2' THEN e.monto ELSE 0 END) AS martes, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '3' THEN e.monto ELSE 0 END) AS miercoles, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '4' THEN e.monto ELSE 0 END) AS jueves, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '5' THEN e.monto ELSE 0 END) AS viernes, "
+        "SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '6' THEN e.monto ELSE 0 END) AS sabado "
+        "FROM egreso e "
+        "JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) "
+        "WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ?";
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+
+    return resultado.first;
+  }
 }
