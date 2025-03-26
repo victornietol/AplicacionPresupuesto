@@ -746,4 +746,69 @@ class DataBaseOperaciones {
 
     return resultado.first;
   }
+
+  // Obtener sumatoria de los ingresos de los 12 meses del anio de un presupuesto
+  Future<Map<String, dynamic>> obtenerSumatoriaIngresosMesesPresupuesto(int idPresupuesto, String nombreUsuario) async {
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = "SELECT "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '01' THEN i.monto ELSE 0 END) AS enero, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '02' THEN i.monto ELSE 0 END) AS febrero, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '03' THEN i.monto ELSE 0 END) AS marzo, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '04' THEN i.monto ELSE 0 END) AS abril, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '05' THEN i.monto ELSE 0 END) AS mayo, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '06' THEN i.monto ELSE 0 END) AS junio, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '07' THEN i.monto ELSE 0 END) AS julio, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '08' THEN i.monto ELSE 0 END) AS agosto, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '09' THEN i.monto ELSE 0 END) AS septiembre, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '10' THEN i.monto ELSE 0 END) AS octubre, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '11' THEN i.monto ELSE 0 END) AS noviembre, "
+        "SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '12' THEN i.monto ELSE 0 END) AS diciembre "
+        "FROM ingreso i "
+        "JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) "
+        "WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ?";
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Obtener sumatoria de los egresos de los 12 meses del anio de un presupuesto
+  Future<Map<String, dynamic>> obtenerSumatoriaEgresosMesesPresupuesto(int idPresupuesto, String nombreUsuario) async {
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = "SELECT "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '1' THEN e.monto ELSE 0 END) AS enero, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '2' THEN e.monto ELSE 0 END) AS febrero, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '3' THEN e.monto ELSE 0 END) AS marzo, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '4' THEN e.monto ELSE 0 END) AS abril, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '5' THEN e.monto ELSE 0 END) AS mayo, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '6' THEN e.monto ELSE 0 END) AS junio, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '7' THEN e.monto ELSE 0 END) AS julio, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '8' THEN e.monto ELSE 0 END) AS agosto, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '9' THEN e.monto ELSE 0 END) AS septiembre, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '10' THEN e.monto ELSE 0 END) AS octubre, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '11' THEN e.monto ELSE 0 END) AS noviembre, "
+        "SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '12' THEN e.monto ELSE 0 END) AS diciembre "
+        "FROM egreso e "
+        "JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) "
+        "WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ?";
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+
+
+
+
 }

@@ -24,6 +24,8 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
   late Future<void> _cargaInicial; // Indicar la carga inicial de datos
   Map<String, dynamic> _sumatoriaIngresosDias = {};
   Map<String, dynamic> _sumatoriaEgresosDias = {};
+  Map<String, dynamic> _sumatoriaIngresosMeses = {};
+  Map<String, dynamic> _sumatoriaEgresosMeses = {};
 
 
   @override
@@ -37,6 +39,7 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
     await Future.wait([
       // Funciones de las que se espera un resultado
       _obtenerTotalesDias(),
+      _obtenerTotalesMeses(),
     ]);
   }
 
@@ -44,6 +47,12 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
   Future<void> _obtenerTotalesDias() async {
     _sumatoriaIngresosDias = await DataBaseOperaciones().obtenerSumatoriaIngresosDiasSemanaPresupuesto(widget.presupuesto['id_presupuesto'], widget.usuario);
     _sumatoriaEgresosDias = await DataBaseOperaciones().obtenerSumatoriaEgresosDiasSemanaPresupuesto(widget.presupuesto['id_presupuesto'], widget.usuario);
+  }
+
+  // Obtener la sumatoria de ingresos y egresos cada dia de la semana de cada presupuesto
+  Future<void> _obtenerTotalesMeses() async {
+    _sumatoriaIngresosMeses = await DataBaseOperaciones().obtenerSumatoriaIngresosMesesPresupuesto(widget.presupuesto['id_presupuesto'], widget.usuario);
+    _sumatoriaEgresosMeses = await DataBaseOperaciones().obtenerSumatoriaEgresosMesesPresupuesto(widget.presupuesto['id_presupuesto'], widget.usuario);
   }
 
   // Formatear cantidad de dinero
@@ -70,8 +79,6 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
 
           } else {
             // Los datos se cargaron
-            print(_sumatoriaIngresosDias);
-            print(_sumatoriaEgresosDias);
             return Scaffold(
               appBar: AppBar(
                 title: Text(
@@ -105,29 +112,83 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
                               ),
                             ),
                           ),
-                          // Graficas de ingresos
+                          // Graficas de ingresos y egresos por dias de la semana
                           Column(
                             children: [
-                              const Text('Comparativa del total de ingresos por día de la semana'),
+                              const Text(
+                                  'Comparativa del total de ingresos por día de la semana',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               GraficaLinea1(
                                 datosGraficar: _sumatoriaIngresosDias,
                                 colorDegradado1: Colors.greenAccent,
                                 colorDegradado2: Colors.green,
                               ),
-                            ],
-                          ),
+                              const SizedBox(height: 20,),
 
-                          // Grafica de egresos
-                          Column(
-                            children: [
-                              const Text('Comparativa del total de egresos por día de la semana'),
+                              const Text(
+                                  'Comparativa del total de egresos por día de la semana',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               GraficaLinea1(
                                 datosGraficar: _sumatoriaEgresosDias,
                                 colorDegradado1: Colors.orange,
                                 colorDegradado2: Colors.red,
                               ),
+                              const SizedBox(height: 20,),
+
+                              Container(
+                                height: 1,
+                                width: MediaQuery.of(context).size.width *0.8,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                ),
+                              )
                             ],
-                          )
+                          ),
+
+                          // Grafica de ingresos y egresos por meses
+                          Column(
+                            children: [
+                              const Text(
+                                'Comparativa del total de ingresos por mes del año',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              GraficaLineaMeses(
+                                datosGraficar: _sumatoriaIngresosMeses,
+                                colorDegradado1: Colors.greenAccent,
+                                colorDegradado2: Colors.green,
+                              ),
+                              const SizedBox(height: 20,),
+
+                              const Text(
+                                'Comparativa del total de egresos por mes del año',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              GraficaLineaMeses(
+                                datosGraficar: _sumatoriaEgresosMeses,
+                                colorDegradado1: Colors.orange,
+                                colorDegradado2: Colors.red,
+                              ),
+                              const SizedBox(height: 20,),
+
+                              Container(
+                                height: 1,
+                                width: MediaQuery.of(context).size.width *0.8,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                ),
+                              )
+                            ],
+                          ),
                         ],
                       ),
                     ),
