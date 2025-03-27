@@ -119,37 +119,14 @@ class _NavegadorState extends State<Navegador>{
     }
   }
 
-  // Funcion para construir los ListTile de graficas para los presupuestos existentes
-  void _crearListTilesGraficas() {
-    _listTilesGraficas.clear();
-    // Recorrer los presupuestos
-    for(var elemento in _listaPresupuestos) {
-      _listTilesGraficas.add(
-        ListTile(
-          title: Text(elemento['nombre'][0].toUpperCase()+elemento['nombre'].substring(1)),
-          onTap: () {
-            Navigator.of(context).pop();
-            Future.delayed(const Duration(milliseconds: 150), () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => VisualizacionGraficas(title: 'Graficas', usuario: widget.usuario, presupuesto: elemento)),
-              );
-            });
-          },
-        ),
-      );
-    }
-  }
-
-  // Funcion para obtener el titulo del presupuesto actual
-  String _obtenerNombrePresupuestoActual() {
+  // Funcion para obtener el presupuesto actual
+  Map<String, dynamic> _obtenerNombrePresupuestoActual() {
     for(var elemento in _listaPresupuestos) {
       if(elemento['id_presupuesto']==_idPresupuesto) {
-        return elemento['nombre'];
+        return elemento;
       }
     }
-    return 'Generico';
+    return {};
   }
 
   @override
@@ -179,8 +156,7 @@ class _NavegadorState extends State<Navegador>{
 
               // Crear elementos del menu lateral desplegable
               _crearListTiles();
-              _crearListTilesGraficas();
-              String nombrePresupuesto = _obtenerNombrePresupuestoActual();
+              Map<String, dynamic> presupuesto = _obtenerNombrePresupuestoActual();
               return Stack(
                 children: [
                   Scaffold(
@@ -208,7 +184,7 @@ class _NavegadorState extends State<Navegador>{
                                 ),
                                 const SizedBox(height: 5,),
                                 Text(
-                                  nombrePresupuesto[0].toUpperCase()+nombrePresupuesto.substring(1),
+                                  presupuesto['nombre'][0].toUpperCase()+presupuesto['nombre'].substring(1),
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 28,
@@ -241,10 +217,36 @@ class _NavegadorState extends State<Navegador>{
                               Navigator.pop(context);
                             },
                           ),
-                          ExpansionTile( // Boton que muestra una lista de botones
+                          ListTile(
                             title: const Text('Graficas'),
                             leading: Icon(Icons.bar_chart),
-                            children: _listTilesGraficas,
+                            onTap: () {
+                              if(_listaPresupuestos.isEmpty) {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: const Text('Aún no se han agregado presupuestos para poder mostrar graficas.'),
+                                        actions: [
+                                          MaterialButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: const Text('Aceptar'),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                );
+                              } else {
+                                Navigator.of(context).pop();
+                                Future.delayed(const Duration(milliseconds: 150), () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => VisualizacionGraficas(title: 'Graficas', usuario: widget.usuario, presupuesto: presupuesto)),
+                                  );
+                                });
+                              }
+                            },
                           ),
                           ListTile(
                             leading: Icon(Icons.exit_to_app),

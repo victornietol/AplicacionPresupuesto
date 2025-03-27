@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 
 class EtiquetaPorcentaje extends StatefulWidget {
@@ -156,7 +157,6 @@ class GraficaLinea1 extends StatefulWidget {
 }
 
 class _GraficaLinea1State extends State<GraficaLinea1> {
-  late Future<void> _cargaInicial;
   List<Color> _gradientColors = [];
   List<FlSpot> _valoresXYSpotFl = [];
   double _valorMayorY = 0.0;
@@ -165,22 +165,13 @@ class _GraficaLinea1State extends State<GraficaLinea1> {
   @override
   void initState() {
     super.initState();
-    _cargaInicial = _cargarDatosVista();
     _valorMayorY = _obtenerValorMayor(widget.datosGraficar);
+    _generarValoresXYSpot();
   }
-
-  // Funcion para ejecutar y esperar el resultado de las funcion asincronas que cargan datos
-  Future<void> _cargarDatosVista() async {
-    await Future.wait([
-      // Funciones de las que se espera un resultado
-      _generarValoresXYSpot(),
-    ]);
-  }
-
 
 
   // Obtener valores en x para la grafica
-  Future<void> _generarValoresXYSpot() async {
+  void _generarValoresXYSpot() {
     int x = 0; // Valor para eje x (indice de cada elemento)
     const List<String> diasSemana = [
       'domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'
@@ -218,45 +209,30 @@ class _GraficaLinea1State extends State<GraficaLinea1> {
       widget.colorDegradado2, // blueAccent
     ];
 
-    return FutureBuilder<void>( // Se utiliza FutureBuilder porque para construir el Scaffold primero se deben de cargar datos de funciones asincronas
-        future: _cargaInicial,
-        builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.waiting) {
-            // Los datos estan cargando
-            return Center(child: CircularProgressIndicator());
-
-          } else if(snapshot.hasError) {
-            return Text("Ocurrio un error, ${snapshot.error}");
-
-          } else {
-            // Los datos se cargaron
-            return SizedBox(
-              height: MediaQuery.of(context).size.height*0.3,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Stack(
-                  children: <Widget>[
-                    AspectRatio(
-                      aspectRatio: 1.50,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          right: 18,
-                          left: 12,
-                          top: 24,
-                          bottom: 12,
-                        ),
-                        child: LineChart(
-                          mainData(),
-                        ),
-                      ),
-                    ),
-
-                  ],
+    return SizedBox(
+      height: MediaQuery.of(context).size.height*0.3,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Stack(
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 1.50,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  right: 18,
+                  left: 12,
+                  top: 24,
+                  bottom: 12,
+                ),
+                child: LineChart(
+                  mainData(),
                 ),
               ),
-            );
-          }
-        }
+            ),
+
+          ],
+        ),
+      ),
     );
 
   }
@@ -401,7 +377,6 @@ class GraficaLineaMeses extends StatefulWidget {
 }
 
 class _GraficaLineaMesesState extends State<GraficaLineaMeses> {
-  late Future<void> _cargaInicial;
   List<Color> _gradientColors = [];
   List<FlSpot> _valoresXYSpotFl = [];
   double _valorMayorY = 0.0;
@@ -410,22 +385,12 @@ class _GraficaLineaMesesState extends State<GraficaLineaMeses> {
   @override
   void initState() {
     super.initState();
-    _cargaInicial = _cargarDatosVista();
     _valorMayorY = _obtenerValorMayor(widget.datosGraficar);
+    _generarValoresXYSpot();
   }
-
-  // Funcion para ejecutar y esperar el resultado de las funcion asincronas que cargan datos
-  Future<void> _cargarDatosVista() async {
-    await Future.wait([
-      // Funciones de las que se espera un resultado
-      _generarValoresXYSpot(),
-    ]);
-  }
-
-
 
   // Obtener valores en x para la grafica
-  Future<void> _generarValoresXYSpot() async {
+  void _generarValoresXYSpot() {
     int x = 0; // Valor para eje x (indice de cada elemento)
     const List<String> meses = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
@@ -463,45 +428,30 @@ class _GraficaLineaMesesState extends State<GraficaLineaMeses> {
       widget.colorDegradado2, // blueAccent
     ];
 
-    return FutureBuilder<void>( // Se utiliza FutureBuilder porque para construir el Scaffold primero se deben de cargar datos de funciones asincronas
-        future: _cargaInicial,
-        builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.waiting) {
-            // Los datos estan cargando
-            return Center(child: CircularProgressIndicator());
-
-          } else if(snapshot.hasError) {
-            return Text("Ocurrio un error, ${snapshot.error}");
-
-          } else {
-            // Los datos se cargaron
-            return SizedBox(
-              height: MediaQuery.of(context).size.height*0.3,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Stack(
-                  children: <Widget>[
-                    AspectRatio(
-                      aspectRatio: 1.50,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          right: 18,
-                          left: 12,
-                          top: 24,
-                          bottom: 12,
-                        ),
-                        child: LineChart(
-                          mainData(),
-                        ),
-                      ),
-                    ),
-
-                  ],
+    return SizedBox(
+      height: MediaQuery.of(context).size.height*0.3,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Stack(
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 1.50,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  right: 18,
+                  left: 12,
+                  top: 24,
+                  bottom: 12,
+                ),
+                child: LineChart(
+                  mainData(),
                 ),
               ),
-            );
-          }
-        }
+            ),
+
+          ],
+        ),
+      ),
     );
 
   }
@@ -625,4 +575,173 @@ class _GraficaLineaMesesState extends State<GraficaLineaMeses> {
 
 
 
+}
+
+
+
+// Grafica del resumen 2
+class GraficaBarras2SinDialog extends StatefulWidget {
+  const GraficaBarras2SinDialog({super.key,
+    required this.tipo,
+    required this.listaCantidades,
+  });
+  final String tipo;
+  final Map<String, dynamic> listaCantidades;
+
+  @override
+  State<GraficaBarras2SinDialog> createState() => _GraficaBarras2SinDialogState();
+}
+
+class _GraficaBarras2SinDialogState extends State<GraficaBarras2SinDialog> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Grafica Scroll horizontal
+        SizedBox(
+            height: MediaQuery.of(context).size.height*0.4,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: widget.listaCantidades.length*80, // ancho dependiendo del numero de elementos
+                child: TweenAnimationBuilder<double>( // Animador para la barra
+                  duration: const Duration(milliseconds: 600),
+                  tween: Tween(begin: 0, end: 1),
+                  builder: (context, animationValue, child) {
+                    return BarChart( // Grafica de barras
+                        BarChartData(
+                            borderData: FlBorderData(show: false),
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: widget.listaCantidades.values.reduce((a, b) => a>b ? a : b)*1.1, // obtener el valor maximo para Y
+                            barGroups: widget.listaCantidades.entries.toList().asMap().entries.map((entry) {
+                              int index = entry.key; // indice manual
+                              MapEntry<String, dynamic> datosEntry = entry.value; // entrada del map
+                              double cantidad = datosEntry.value; // monto de la categoria
+
+                              return BarChartGroupData(
+                                x: index, // Indice de la barra del grafico
+                                barRods: [
+                                  BarChartRodData( // Barras
+                                    toY: cantidad * animationValue, // altura de la barra (eje Y)
+                                    color: Colors.primaries[index % Colors.primaries.length], // Agregar color dinamicamente
+                                    width: 30, // ancho de la barras
+                                  ),
+                                ],
+                                //showingTooltipIndicators: [0] // Donde mostrar tooltip
+                              );
+                            }).toList(),
+                            titlesData: FlTitlesData(
+                                leftTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)
+                                ),
+                                rightTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)
+                                ),
+                                topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)
+                                ),
+                                bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                        showTitles: true,
+                                        getTitlesWidget: (double value, TitleMeta meta) {
+                                          // Obtener titulo
+                                          int index = value.toInt();
+                                          if(index>=0 && index<widget.listaCantidades.length) {
+                                            String titulo = widget.listaCantidades.keys.elementAt(index)[0].toUpperCase()+widget.listaCantidades.keys.elementAt(index).substring(1); // obtener categoria
+                                            return SideTitleWidget(
+                                              axisSide: meta.axisSide,
+                                              child: Transform.rotate(
+                                                angle: -0.6, // Rotar texto
+                                                child: Text(
+                                                  titulo,
+                                                  style: const TextStyle(fontSize: 12),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          // Si no hay valores validos no se muestra nada
+                                          return Container();
+                                        },
+                                        reservedSize: 60 // espacio para los titulos del eje X
+                                    )
+                                )
+                            )
+                        )
+                    );
+                  },
+                ),
+              ),
+            )
+        ),
+        const SizedBox(height: 10,),
+
+        // Leyenda de colores
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: widget.listaCantidades.entries.toList().asMap().entries.map((entry) {
+            int index = entry.key;
+            String categoria = entry.value.key;
+            return Row(
+              children: <Widget>[
+                Container(
+                  width: 15,
+                  height: 15,
+                  color: Colors.primaries[index % Colors.primaries.length],
+                ),
+                const SizedBox(width: 8,),
+                Text(categoria[0].toUpperCase()+categoria.substring(1))
+              ],
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+}
+
+
+// Grafica Radial Bar
+class GraficaRadialBarSinDialog extends StatefulWidget {
+  const GraficaRadialBarSinDialog({super.key,
+    required this.totalIngresos,
+    required this.totalEgresos,
+    required this.colorIngresos,
+    required this.colorEgresos,
+  });
+  final double totalIngresos;
+  final double totalEgresos;
+  final Color colorIngresos;
+  final Color colorEgresos;
+
+  @override
+  State<GraficaRadialBarSinDialog> createState() => GraficaRadialBarSinDialogState();
+}
+
+class GraficaRadialBarSinDialogState extends State<GraficaRadialBarSinDialog> {
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> datos = [
+      {'tipo':'Ingresos', 'monto':widget.totalIngresos, 'color':widget.colorIngresos},
+      {'tipo':'Egresos', 'monto':widget.totalEgresos, 'color':widget.colorEgresos}
+    ];
+
+    return SfCircularChart(
+      title: const ChartTitle(
+        text: 'Cantidades',
+      ),
+      legend: const Legend(isVisible: true, isResponsive: true),
+      series: <RadialBarSeries<Map<String, dynamic>, String>>[
+        RadialBarSeries<Map<String, dynamic>, String>(
+          dataSource: datos,
+          xValueMapper: (Map<String, dynamic> data, _) => data['tipo'],
+          yValueMapper: (Map<String, dynamic> data, _) => data['monto'],
+          pointColorMapper: (Map<String, dynamic> data, _) => data['color'],
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
+        ),
+      ],
+    );
+  }
 }
