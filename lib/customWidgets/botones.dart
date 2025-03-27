@@ -700,81 +700,90 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                     }
                 )
               },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column( // parte izquieda
-                          crossAxisAlignment: CrossAxisAlignment.start, // ------
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.withOpacity(0.1),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.3),
+                  )
+                ),
+                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column( // parte izquieda
+                            crossAxisAlignment: CrossAxisAlignment.start, // ------
+                            children: [
+                              Text( // Nombre de elemento
+                                elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
+                                softWrap: true,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: tamanioTextPrincipal,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text( // Categoria
+                                categoria[0].toUpperCase()+categoria.substring(1),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.grey,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+
+                        Column( // parte derecha
+                          crossAxisAlignment: CrossAxisAlignment.end, // ----------
                           children: [
-                            Text( // Nombre de elemento
-                              elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
-                              softWrap: true,
+                            Text(
+                              montoFormateado,
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
                                 fontSize: tamanioTextPrincipal,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text( // Categoria
-                              categoria[0].toUpperCase()+categoria.substring(1),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-
-                      Column( // parte derecha
-                        crossAxisAlignment: CrossAxisAlignment.end, // ----------
-                        children: [
-                          Text(
-                            montoFormateado,
-                            style: TextStyle(
-                              fontSize: tamanioTextPrincipal,
-                            ),
-                          ),
-                          if(widget.mostrarTotalIngresosCategoria) // Si es una pestaña de una categoria (no se muestra en pestaña 'todos')
-                            Row(
-                              children: <Widget>[
-                                EtiquetaPorcentaje( // Porcentaje
-                                  texto: '${((elemento['monto']*100.0) / _sumaTotalCategoria).toStringAsFixed(2)}%', // Porcentaje respecto al total de la categoria actual
-                                  colorFondo: const Color(0xffdae9ff),
-                                  textStyle: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.indigo,
+                            if(widget.mostrarTotalIngresosCategoria) // Si es una pestaña de una categoria (no se muestra en pestaña 'todos')
+                              Row(
+                                children: <Widget>[
+                                  EtiquetaPorcentaje( // Porcentaje
+                                    texto: '${((elemento['monto']*100.0) / _sumaTotalCategoria).toStringAsFixed(2)}%', // Porcentaje respecto al total de la categoria actual
+                                    colorFondo: const Color(0xffdae9ff),
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.indigo,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 2.0,),
-                                EtiquetaPorcentaje( // Porcentaje
-                                  texto: '${porcentaje.toStringAsFixed(2)}%', // Porcentaje respecto al total de ingresos o egresos
-                                  colorFondo: widget.tipo=='ingreso' ? const Color(0xFFd4fed7) : const Color(0xffffdada),
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
+                                  const SizedBox(width: 2.0,),
+                                  EtiquetaPorcentaje( // Porcentaje
+                                    texto: '${porcentaje.toStringAsFixed(2)}%', // Porcentaje respecto al total de ingresos o egresos
+                                    colorFondo: widget.tipo=='ingreso' ? const Color(0xFFd4fed7) : const Color(0xffffdada),
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
+                                    ),
                                   ),
+                                ],
+                              )
+                            else // Si es la pestaña todos
+                              EtiquetaPorcentaje( // Porcentajes
+                                texto: '${porcentaje.toStringAsFixed(2)}%',
+                                colorFondo: widget.tipo=='ingreso' ? const Color(0xFFd4fed7) : const Color(0xffffdada),
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
                                 ),
-                              ],
-                            )
-                          else // Si es la pestaña todos
-                            EtiquetaPorcentaje( // Porcentajes
-                              texto: '${porcentaje.toStringAsFixed(2)}%',
-                              colorFondo: widget.tipo=='ingreso' ? const Color(0xFFd4fed7) : const Color(0xffffdada),
-                              textStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: widget.tipo == 'ingreso' ? Colors.green : Colors.red,
                               ),
-                            ),
-                          /*
+                            /*
                             Container( // Porcentajes
                               color: Color(0xFFd4fed7),
                               padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
@@ -788,21 +797,22 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
 
                              */
 
-                        ],
-                      ),
-                    ],
-                  ),
+                          ],
+                        ),
+                      ],
+                    ),
 
 
 
-                  const SizedBox(
-                    height: 6.0,
-                  ),
-                  Container( // linea de separacion
-                    height: 1.0,
-                    color: const Color(0xFFe6e6e6),
-                  )
-                ],
+                    const SizedBox(
+                      height: 6.0,
+                    ),
+                    Container( // linea de separacion
+                      height: 1.0,
+                      color: const Color(0xFFe6e6e6),
+                    )
+                  ],
+                ),
               ),
             )
         ),
