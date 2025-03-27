@@ -807,8 +807,59 @@ class DataBaseOperaciones {
     return resultado.first;
   }
 
+  // Obtener todos los ingresos de un presupuesto y un usuario
+  Future<List<Map<String, dynamic>>> obtenerListadoIngresosTodos(int idPresupuesto, String nombreUsuario) async {
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
 
+    String consulta = """
+        SELECT 
+          i.id_ingreso AS id_ingreso, 
+          i.nombre AS nombre, 
+          i.monto AS monto, 
+          i.descripcion AS descripcion, 
+          i.fecha_registro AS fecha_registro, 
+          i.fk_id_usuario AS fk_id_usuario, 
+          ci.id_categoria AS id_categoria, 
+          ci.nombre AS categoria 
+        FROM ingreso i 
+        JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
+        JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) 
+        WHERE i.fk_id_usuario = ? AND p.id_presupuesto = ?
+        """;
 
+    return await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+  }
+
+  // Obtener todos los egresos de un presupuesto y un usuario
+  Future<List<Map<String, dynamic>>> obtenerListadoEgresosTodos(int idPresupuesto, String nombreUsuario) async {
+    final db = await database;
+    final Map<String, dynamic> datosUsuario = await obtenerUsuario(nombreUsuario);
+
+    String consulta = """
+        SELECT
+          e.id_egreso AS id_egreso, 
+          e.nombre AS nombre, 
+          e.monto AS monto, 
+          e.descripcion AS descripcion, 
+          e.fecha_registro AS fecha_registro, 
+          e.fk_id_usuario AS fk_id_usuario, 
+          ce.id_categoria AS id_categoria, 
+          ce.nombre AS categoria 
+        FROM egreso e 
+        JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
+        WHERE e.fk_id_usuario = ? AND p.id_presupuesto = ?
+        """;
+
+    return await db.rawQuery(
+        consulta,
+        [datosUsuario['id_usuario'], idPresupuesto]
+    );
+  }
 
 
 }

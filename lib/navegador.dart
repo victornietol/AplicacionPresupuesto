@@ -1,3 +1,4 @@
+import 'package:calculadora_presupuesto/vistas/calendario.dart';
 import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/vistas/home.dart';
 import 'package:calculadora_presupuesto/vistas/egresos.dart';
@@ -211,10 +212,17 @@ class _NavegadorState extends State<Navegador>{
                             },
                           ),
                           ListTile(
-                            leading: Icon(Icons.account_circle),
-                            title: Text('Perfil'),
+                            leading: Icon(Icons.calendar_month),
+                            title: Text('Calendario'),
                             onTap: () {
-                              Navigator.pop(context);
+                              Navigator.of(context).pop();
+                              Future.delayed(const Duration(milliseconds: 150), () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Calendario(title: 'Calendario', usuario: widget.usuario, presupuesto: presupuesto)),
+                                );
+                              });
                             },
                           ),
                           ListTile(

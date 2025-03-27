@@ -142,6 +142,8 @@ class _BotonIngresoEgresoState extends State<BotonIngresoEgreso> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: tamanioTextPrincipal,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text( // Categoria
                               categoria[0].toUpperCase()+categoria.substring(1),

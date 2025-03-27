@@ -2,9 +2,8 @@ import 'package:calculadora_presupuesto/customWidgets/otrosWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
-import 'package:calculadora_presupuesto/navegador.dart';
+
 
 class VisualizacionGraficas extends StatefulWidget {
   const VisualizacionGraficas({super.key,

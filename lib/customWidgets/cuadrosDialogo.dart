@@ -1620,7 +1620,7 @@ class GraficaRadialBarState extends State<GraficaRadialBar> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SfCircularChart(
-                      title: const ChartTitle(
+                      title: ChartTitle(
                         text: 'Cantidades',
                       ),
                       legend: const Legend(isVisible: true, isResponsive: true),

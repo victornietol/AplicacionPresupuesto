@@ -729,7 +729,7 @@ class GraficaRadialBarSinDialogState extends State<GraficaRadialBarSinDialog> {
     ];
 
     return SfCircularChart(
-      title: const ChartTitle(
+      title: ChartTitle(
         text: 'Cantidades',
       ),
       legend: const Legend(isVisible: true, isResponsive: true),
