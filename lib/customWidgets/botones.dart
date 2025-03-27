@@ -706,26 +706,33 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column( // parte izquieda
-                        crossAxisAlignment: CrossAxisAlignment.start, // ------
-                        children: [
-                          Text( // Nombre de elemento
-                            elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
-                            softWrap: true,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: tamanioTextPrincipal,
+                      Expanded(
+                        child: Column( // parte izquieda
+                          crossAxisAlignment: CrossAxisAlignment.start, // ------
+                          children: [
+                            Text( // Nombre de elemento
+                              elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
+                              softWrap: true,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: tamanioTextPrincipal,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          Text( // Categoria
-                            categoria[0].toUpperCase()+categoria.substring(1),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey,
+                            Text( // Categoria
+                              categoria[0].toUpperCase()+categoria.substring(1),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 5),
 
                       Column( // parte derecha
                         crossAxisAlignment: CrossAxisAlignment.end, // ----------
@@ -1099,26 +1106,33 @@ class _BotonIngresoEgresoRankingState extends State<BotonIngresoEgresoRanking> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              Column( // parte central
-                                crossAxisAlignment: CrossAxisAlignment.start, // ------
-                                children: [
-                                  Text( // Nombre de elemento
-                                    elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
-                                    softWrap: true,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: tamanioTextPrincipal,
+                              Expanded(
+                                child: Column( // parte central
+                                  crossAxisAlignment: CrossAxisAlignment.start, // ------
+                                  children: [
+                                    Text( // Nombre de elemento
+                                      elemento["nombre"][0].toUpperCase()+elemento['nombre'].substring(1),
+                                      softWrap: true,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: tamanioTextPrincipal,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  Text( // Categoria
-                                    categoria[0].toUpperCase()+categoria.substring(1),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.grey,
+                                    Text( // Categoria
+                                      categoria[0].toUpperCase()+categoria.substring(1),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.grey,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
+                              const SizedBox(width: 5),
                               Column( // parte derecha
                                 crossAxisAlignment: CrossAxisAlignment.end, // ----------
                                 children: [
@@ -1142,9 +1156,6 @@ class _BotonIngresoEgresoRankingState extends State<BotonIngresoEgresoRanking> {
                             ],
                           )
                       ),
-
-
-
 
                     ],
                   ),
