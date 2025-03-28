@@ -704,9 +704,7 @@ class _BotonIngresoEgreso2State extends State<BotonIngresoEgreso2> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.grey.withOpacity(0.1),
-                  border: Border.all(
-                    color: Colors.grey.withOpacity(0.3),
-                  )
+                  //border: Border.all(color: Colors.grey.withOpacity(0.3),)
                 ),
                 padding: EdgeInsets.symmetric(vertical: 6, horizontal: 6),
                 child: Column(

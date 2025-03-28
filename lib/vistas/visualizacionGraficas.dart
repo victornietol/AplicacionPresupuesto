@@ -216,7 +216,7 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
                               Container(
                                 height: 1,
                                 width: MediaQuery.of(context).size.width *0.8,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.grey,
                                 ),
                               )
@@ -258,7 +258,7 @@ class _VisualizacionGraficasState extends State<VisualizacionGraficas> {
                               Container(
                                 height: 1,
                                 width: MediaQuery.of(context).size.width *0.8,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.grey,
                                 ),
                               )

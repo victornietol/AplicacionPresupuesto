@@ -141,26 +141,12 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
         builder: (context, snapshot) {
           if(snapshot.connectionState == ConnectionState.waiting) {
             // Los datos estan cargando
-            return Scaffold(
-              /*
-              appBar: AppBar(
-                backgroundColor: const Color(0xFF02013C),
-                centerTitle: true,
-                title: Text(
-                  widget.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    letterSpacing: 1.toDouble(),
-                  ),
-                ),
-              ),
-
-               */
-              body: const Center(child: CircularProgressIndicator()),
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             );
 
           } else if(snapshot.hasError) {
-            return Text("Ocurrio un error");
+            return const Text("Ocurrio un error");
 
           } else {
             // Si cambio el tamaño del texto del balance (se construye hasta que FutureBuilder tiene datos)
@@ -172,30 +158,13 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
             // Los datos se cargaron
             return Scaffold(
-              /*
-              appBar: AppBar(
-                backgroundColor: const Color(0xFF02013C),
-                centerTitle: true,
-                title: Text(
-                  widget.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    letterSpacing: 1.toDouble(),
-                  ),
-                ),
-              ),
-
-               */
-
               body: Column(
                 children: <Widget>[
 
                   // Parte superior (texto suma de ingresos)
                   Container(
-                      //width: double.infinity, // Se ajusta a toda la pantalla
-                      //color: const Color(0xFFd4fed7),
                       width: MediaQuery.of(context).size.width*0.94,
-                      margin: EdgeInsets.only(top: 10),
+                      margin: const EdgeInsets.only(top: 10),
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),

@@ -1330,7 +1330,6 @@ class _GraficaBarrasState extends State<GraficaBarras> {
                               int index = entry.key; // indice manual
                               MapEntry<String, dynamic> datosEntry = entry.value; // entrada del map
                               double cantidad = datosEntry.value; // monto de la categoria
-                              String titulo = datosEntry.key; // nombre de la categoria
 
                               return BarChartGroupData(
                                   x: index, // Indice de la barra del grafico
@@ -1853,9 +1852,6 @@ class _CuadroDialogoEditarPresupuestoState extends State<CuadroDialogoEditarPres
     return await DataBaseOperaciones().eliminarPresupuesto(presupuesto['id_presupuesto'], presupuesto['fk_id_usuario']);
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -2057,56 +2053,17 @@ class _CuadroDialogoEditarPresupuestoState extends State<CuadroDialogoEditarPres
   }
 }
 
-/*
-// Cuadro de de dialogo para mostrar detalles un ingreso o egreso
-class CuadroDialogoDetalles2 extends StatefulWidget {
-  const CuadroDialogoDetalles2({super.key,
-    required this.tipo,
-    required this.elemento,
-    required this.categoriaElemento,
-    required this.listaCategorias,
-    required this.montoFormateado,
-    required this.usuario,
-    required this.idPresupuesto,
-  });
-  final String tipo;
-  final Map<String, dynamic> elemento;
-  final String categoriaElemento;
-  final List<Map<String, dynamic>> listaCategorias;
-  final String montoFormateado;
-  final String usuario;
-  final int idPresupuesto;
 
+
+// Cuadro de de dialogo para editar un presupuesto
+class CuadroDialogoInformacionApp extends StatefulWidget {
+  const CuadroDialogoInformacionApp({super.key});
 
   @override
-  State<CuadroDialogoDetalles2> createState() => _CuadroDialogoDetalles2State();
+  State<CuadroDialogoInformacionApp> createState() => _CuadroDialogoInformacionAppState();
 }
 
-class _CuadroDialogoDetalles2State extends State<CuadroDialogoDetalles2> {
-
-  String _formatearFecha(String fechaPlana) {
-    DateTime fecha = DateTime.parse(fechaPlana);
-    return DateFormat("dd/MM/yyyy,  h:mm a").format(fecha);
-  }
-
-  Future<bool> _eliminarElemento(String tipo, Map<String, dynamic> elemento) async {
-    try {
-      // Intentar eliminacion
-      if(tipo=='ingreso') {
-        bool eliminacionExitosa = await DataBaseOperaciones().eliminarIngreso(elemento['id_ingreso'], widget.usuario);
-        return eliminacionExitosa;
-      } else if(tipo=='egreso') {
-        bool eliminacionExitosa = await DataBaseOperaciones().eliminarEgreso(elemento['id_egreso'], widget.usuario);
-        return eliminacionExitosa;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      // Ocurrio un error
-      return false;
-    }
-
-  }
+class _CuadroDialogoInformacionAppState extends State<CuadroDialogoInformacionApp> {
 
   @override
   Widget build(BuildContext context) {
@@ -2117,299 +2074,193 @@ class _CuadroDialogoDetalles2State extends State<CuadroDialogoDetalles2> {
       child: SingleChildScrollView(
         child: Container(
           width: MediaQuery.of(context).size.width, //Ancho de la pantalla
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Column(
-                // Titulo de la ventana
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    widget.tipo=='ingreso' ? 'Detalles del ingreso' : 'Detalles del egreso',
-                    style: const TextStyle(
-                      fontSize: 30.0,
-                    ),
-                    softWrap: true,
-                  ),
-                ],
+              Text(
+                'Información de la App',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  color: const Color(0xFF02013C).withOpacity(0.8),
+                ),
               ),
 
-              Column( // Contenido de la ventana
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 20,),
-                  Container( // Nombre del ingreso
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(6.0),
-                        topRight: Radius.circular(6.0),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: const BorderRadius.all(Radius.circular(14)),
+                ),
+                child: const Column(
+                  children: [
+                    Text(
+                      'Gestor de Presupuestos',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                            'Nombre:'
-                        ),
-                        Text(
-                          widget.elemento['nombre'][0].toUpperCase()+widget.elemento['nombre'].substring(1),
-                          softWrap: true,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 2,),
-                  Container( // Monto del ingreso
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                        color: Colors.white
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                            'Monto:'
-                        ),
-                        Text(
-                          widget.montoFormateado,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 2,),
-                  Container( // Descripcion del ingreso
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                        color: Colors.white
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                            'Descripcion:'
-                        ),
-                        Text(
-                          widget.elemento['descripcion'][0].toUpperCase()+widget.elemento['descripcion'].substring(1),
-                          softWrap: true,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 2,),
-                  Container( // Categoria del ingreso
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                            'Categoria:'
-                        ),
-                        Text(
-                          widget.categoriaElemento[0].toUpperCase()+widget.categoriaElemento.substring(1),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 2,),
-                  Container( // Fecha de registro del ingreso
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    width: double.maxFinite,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(6.0),
-                        bottomRight: Radius.circular(6.0),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                            'Fecha de registro:'
-                        ),
-                        Text(
-                          _formatearFecha(widget.elemento['fecha_registro']),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20,),
-                ],
+                    SizedBox(height: 10),
+                    Text('Versión 1.0.0'),
+                    SizedBox(height: 10),
+                    Text('Desarrollador: Victor Manuel Nieto Licona'),
+                    SizedBox(height: 10),
+                    Text('2025'),
+                  ],
+                ),
               ),
 
-              Column( // Botones
-                children: <Widget>[
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          MaterialButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        "Alerta",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold
-                                        ),
-                                      ),
-                                      content: const Text(
-                                        "¿Esta seguro que desea eliminar el elemento?",
-                                        softWrap: true,
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text(
-                                              "Cancelar",
-                                              style: TextStyle(
-                                                  color: Colors.black
-                                              ),
-                                            )
-                                        ),
-                                        TextButton(
-                                            onPressed: () {
-                                              _eliminarElemento(widget.tipo, widget.elemento).then((value) {
-                                                if(value && widget.tipo=='ingreso') {
-                                                  // Si se realizo la eliminacion se carga la vista de ingresos
-                                                  Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) => Navegador(inicio: 0, usuario: widget.usuario)),
-                                                        (Route<dynamic> route) => false,
-                                                  );
+              /*
+              Container(
+                color: Colors.grey,
+                height: 1,
+              ),
+               */
+              const SizedBox(height: 10),
 
-                                                } else if(value && widget.tipo=='egreso') {
-                                                  // Si se realizo la eliminacion se carga la vista de egresos
-                                                  Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) => Navegador(inicio: 2, usuario: widget.usuario)),
-                                                        (Route<dynamic> route) => false,
-                                                  );
-
-                                                } else {
-                                                  // No se realizo la operacion y se muestra cuadro de dialogo
-                                                  Navigator.pop(context);
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return AlertDialog(
-                                                          title: const Text("Ocurrio un error al eliminar el elemento."),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () => Navigator.of(context).pop(),
-                                                              child: const Text("Aceptar"),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      }
-                                                  );
-                                                }
-                                              });
-                                            },
-                                            child: Text("Confirmar")
-                                        ),
-                                      ],
-                                    );
-                                  }
-                              );
-                            },
-                            color: Colors.red,
-                            child: const Text(
-                              'Eliminar',
-                              style: TextStyle(
-                                  color: Colors.white
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12,),
-                          MaterialButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CuadroDialogoEditar(
-                                      tipo: widget.tipo,
-                                      listaCategorias: widget.listaCategorias,
-                                      usuario: widget.usuario,
-                                      elemento: widget.elemento,
-                                      categoriaElemento: widget.categoriaElemento,
-                                      idPresupuesto: widget.idPresupuesto,
-                                    );
-                                  }
-                              );
-                            },
-                            color: const Color(0xFF02013C),
-                            child: const Text(
-                              'Editar',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: const BorderRadius.all(Radius.circular(14)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Sobre la App',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: const Color(0xFF02013C).withOpacity(0.8),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          MaterialButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            color: Colors.grey,
-                            child: const Text(
-                              'Regresar',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                    ),
+
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Descripción',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold
                       ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Gestor de Presupuestos es una aplicación diseñada para ayudar al usuario a '
+                          'administrar sus ingresos y egresos de manera local. Con gráficos y '
+                          'reportes, se busca brindar apoyo en la toma de decisiones financieras.',
+                      textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Características principales',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('• Registro de ingresos y egresos\n'
+                        '• Visualización de datos en gráficos\n'
+                        '• Personalización de categorías\n'
+                        '• Cálculo automático de balance general',
+                    ),
+                  ],
+                ),
+              ),
 
-                    ],
-                  )
-                ],
-              )
+              const SizedBox(height: 10),
 
+              /*
+              Container(
+                color: Colors.grey,
+                height: 1,
+              ),
+
+               */
+
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.all(Radius.circular(14)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Tecnologías',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: const Color(0xFF02013C).withOpacity(0.8),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Flutter & Dart',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                        'DB: SQLite\n'
+                            'UI: Material Desing\n'
+                            'Dependencias:\n'
+                            '  • decimal\n'
+                            '  • intl\n'
+                            '  • dropdown_button2\n'
+                            '  • fl_chart\n'
+                            '  • syncfusion_flutter_charts\n'
+                            '  • shared_preferences\n'
+                            '  • table_calendar'
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: const BorderRadius.all(Radius.circular(14)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Contacto',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: const Color(0xFF02013C).withOpacity(0.8),
+                      ),
+                    ),
+                    const Text('victornieto315@gmai.com'),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Botones
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                color: const Color(0xFF02013C),
+                child: const Text(
+                  'Cerrar',
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -2417,5 +2268,3 @@ class _CuadroDialogoDetalles2State extends State<CuadroDialogoDetalles2> {
     );
   }
 }
-
- */
