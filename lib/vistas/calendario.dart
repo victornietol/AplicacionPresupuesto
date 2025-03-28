@@ -1,3 +1,4 @@
+import 'package:calculadora_presupuesto/customWidgets/cuadrosDialogo.dart';
 import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,6 +28,8 @@ class _CalendarioState extends State<Calendario> {
   Map<DateTime, List<Event>> _eventos = {};
   List<Map<String, dynamic>> _datosIngresos = [];
   List<Map<String, dynamic>> _datosEgresos = [];
+  List<Map<String, dynamic>> _listaCategoriasIngreso = [];
+  List<Map<String, dynamic>> _listaCategoriasEgreso = [];
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _CalendarioState extends State<Calendario> {
     await Future.wait([
       // Funciones de las que se espera un resultado
       _obtenerIngresosEgresosTodos(),
+      _obtenerCategorias(),
     ]);
   }
 
@@ -53,7 +57,7 @@ class _CalendarioState extends State<Calendario> {
 
     // Agregar ingresos
     for(var ingreso in _datosIngresos) {
-      List<Event> evento = [Event(ingreso['nombre'], ingreso['monto'], ingreso['descripcion'], ingreso['categoria'], 'ingreso')];
+      List<Event> evento = [Event(ingreso['id_ingreso'], ingreso['nombre'], ingreso['monto'], ingreso['descripcion'], ingreso['fecha_registro'], ingreso['fk_id_usuario'], ingreso['id_categoria'], ingreso['categoria'], 'ingreso')];
 
       // Obtener fecha
       int anio = int.parse(ingreso['fecha_registro'].substring(0, 4));
@@ -66,7 +70,7 @@ class _CalendarioState extends State<Calendario> {
 
     // Agregar egresos
     for(var egreso in _datosEgresos) {
-      List<Event> evento = [Event(egreso['nombre'], egreso['monto'], egreso['descripcion'], egreso['categoria'], 'egreso')];
+      List<Event> evento = [Event(egreso['id_egreso'] ,egreso['nombre'], egreso['monto'], egreso['descripcion'], egreso['fecha_registro'], egreso['fk_id_usuario'], egreso['id_categoria'], egreso['categoria'], 'egreso')];
 
       // Obtener fecha
       int anio = int.parse(egreso['fecha_registro'].substring(0, 4));
@@ -95,6 +99,14 @@ class _CalendarioState extends State<Calendario> {
     final formatoDinero = NumberFormat.currency(locale: "es_MX", symbol: "\$");
     return formatoDinero.format(monto);
   }
+
+  // Obtener categorias
+  Future<void> _obtenerCategorias() async {
+    _listaCategoriasIngreso = await DataBaseOperaciones().obtenerCategorias("ingreso", widget.presupuesto['id_presupuesto']);
+    _listaCategoriasEgreso = await DataBaseOperaciones().obtenerCategorias("egreso", widget.presupuesto['id_presupuesto']);
+  }
+
+
 
   // Lo que muestra la vista
   @override
@@ -180,8 +192,8 @@ class _CalendarioState extends State<Calendario> {
                               return Center(
                                 child: Text(
                                   text,
-                                  style: TextStyle(
-                                      color: Colors.red,
+                                  style: const TextStyle(
+                                      color: Colors.indigo,
                                       fontWeight: FontWeight.bold
                                   ),
                                 ),
@@ -195,14 +207,14 @@ class _CalendarioState extends State<Calendario> {
                             return Container(
                               margin: EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: isWeekend ? Colors.red.withOpacity(0.3) : Colors.grey.withOpacity(0.2), // Fondo rojo para fines de semana
+                                color: isWeekend ? Colors.lightBlue.withOpacity(0.3) : Colors.grey.withOpacity(0.2), // Fondo rojo para fines de semana
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Center(
                                 child: Text(
                                   '${day.day}',
                                   style: TextStyle(
-                                    color: isWeekend ? Colors.red : Colors.black,
+                                    color: isWeekend ? Colors.indigo: Colors.black,
                                     fontWeight: isWeekend ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),
@@ -279,7 +291,32 @@ class _CalendarioState extends State<Calendario> {
                 Text('Categoria: ${events[index].categoria[0].toUpperCase()+events[index].categoria.substring(1)}'),
               ],
             ),
-            leading: events[index].tipo=='ingreso' ? Icon(Icons.trending_up_outlined) :Icon(Icons.trending_down_outlined) ,
+            leading: events[index].tipo=='ingreso' ? Icon(Icons.trending_up_outlined) :Icon(Icons.trending_down_outlined),
+            onTap: () {
+              Map<String, dynamic> elemento = {
+                'id_${events[index].tipo}': events[index].id,
+                'nombre': events[index].titulo,
+                'monto': events[index].monto,
+                'descripcion': events[index].descripcion,
+                'fecha_registro': events[index].fecha,
+                'fk_id_usuario': events[index].fk_id_usuario,
+                'fk_id_categoria_${events[index].tipo}': events[index].id_categoria
+              };
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CuadroDialogoDetalles(
+                        tipo: events[index].tipo,
+                        listaCategorias: events[index].tipo=='ingreso' ? _listaCategoriasIngreso : _listaCategoriasEgreso,
+                        elemento: elemento,
+                        categoriaElemento: events[index].categoria,
+                        montoFormateado: formatearCantidad(events[index].monto),
+                        usuario: widget.usuario,
+                        idPresupuesto: widget.presupuesto['id_presupuesto']
+                    );
+                  }
+              );
+            },
           ),
         );
       },
@@ -289,13 +326,17 @@ class _CalendarioState extends State<Calendario> {
 }
 
 class Event {
+  final int id;
   final String titulo;
   final double monto;
   final String descripcion;
+  final String fecha;
+  final int fk_id_usuario;
+  final int id_categoria;
   final String categoria;
   final String tipo;
 
-  Event(this.titulo, this.monto, this.descripcion, this.categoria, this.tipo);
+  Event(this.id, this.titulo, this.monto, this.descripcion, this.fecha, this.fk_id_usuario, this.id_categoria, this.categoria, this.tipo);
 
   @override
   String toString() {

@@ -319,7 +319,9 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                             children: [
                               Icon(Icons.add_rounded),
                               Text(
-                                  "Agregar egreso"
+                                  "Agregar egreso",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           )
@@ -343,7 +345,9 @@ class _EgresosState extends State<Egresos> with SingleTickerProviderStateMixin {
                             children: [
                               Icon(Icons.add_rounded),
                               Text(
-                                  "Agregar categoria"
+                                  "Agregar categoria",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           )

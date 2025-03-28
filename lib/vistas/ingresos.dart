@@ -192,9 +192,16 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
 
                   // Parte superior (texto suma de ingresos)
                   Container(
-                      width: double.infinity, // Se ajusta a toda la pantalla
-                      color: const Color(0xFFd4fed7),
+                      //width: double.infinity, // Se ajusta a toda la pantalla
+                      //color: const Color(0xFFd4fed7),
+                      width: MediaQuery.of(context).size.width*0.94,
+                      margin: EdgeInsets.only(top: 10),
                       padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.green.withOpacity(0.2),
+                        border: Border.all(color: Colors.green),
+                      ),
                       child: MaterialButton(
                         onPressed: () {
                           // Motrar grafica
@@ -326,7 +333,9 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                             children: [
                               Icon(Icons.add_rounded),
                               Text(
-                                  "Agregar ingreso"
+                                  "Agregar ingreso",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           )
@@ -350,7 +359,9 @@ class _IngresosState extends State<Ingresos> with SingleTickerProviderStateMixin
                             children: [
                               Icon(Icons.add_rounded),
                               Text(
-                                  "Agregar categoria"
+                                  "Agregar categoria",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           )
