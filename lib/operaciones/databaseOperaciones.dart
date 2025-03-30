@@ -861,5 +861,235 @@ class DataBaseOperaciones {
     );
   }
 
+  // Ingresos por dia de la semana actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerIngresosPorDiaSemanaActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '0' THEN i.monto ELSE 0 END) AS domingo,
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '1' THEN i.monto ELSE 0 END) AS lunes, 
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '2' THEN i.monto ELSE 0 END) AS martes, 
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '3' THEN i.monto ELSE 0 END) AS miercoles, 
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '4' THEN i.monto ELSE 0 END) AS jueves, 
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '5' THEN i.monto ELSE 0 END) AS viernes, 
+        SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '6' THEN i.monto ELSE 0 END) AS sabado 
+      FROM ingreso i 
+        JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
+        JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        i.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(substr(i.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days'))
+    """; // Se eligen las fechas dentro del rango de la semana actual, primero se identifica el domingo mas proximo y se le estan 6 dias para el inicio de la semana
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+      consulta,
+      [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Egresos por dia de la semana actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerEgresosPorDiaSemanaActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '0' THEN e.monto ELSE 0 END) AS domingo,
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '1' THEN e.monto ELSE 0 END) AS lunes, 
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '2' THEN e.monto ELSE 0 END) AS martes, 
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '3' THEN e.monto ELSE 0 END) AS miercoles, 
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '4' THEN e.monto ELSE 0 END) AS jueves, 
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '5' THEN e.monto ELSE 0 END) AS viernes, 
+        SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '6' THEN e.monto ELSE 0 END) AS sabado 
+      FROM egreso e
+        JOIN categoria_ingreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        e.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(substr(e.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days'))
+    """; // Se eligen las fechas dentro del rango de la semana actual, primero se identifica el domingo mas proximo y se le estan 6 dias para el inicio de la semana
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Ingresos por semana del mes actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerIngresosPorSemanaMesActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 1 THEN i.monto ELSE 0 END) AS semana1,
+        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 2 THEN i.monto ELSE 0 END) AS semana2,
+        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 3 THEN i.monto ELSE 0 END) AS semana3,
+        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 4 THEN i.monto ELSE 0 END) AS semana4,
+        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 5 THEN i.monto ELSE 0 END) AS semana5
+      FROM ingreso i 
+        JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
+        JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        i.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(substr(i.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day')
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Egresos por semana del mes actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerEgresosPorSemanaMesActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 1 THEN e.monto ELSE 0 END) AS semana1,
+        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 2 THEN e.monto ELSE 0 END) AS semana2,
+        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 3 THEN e.monto ELSE 0 END) AS semana3,
+        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 4 THEN e.monto ELSE 0 END) AS semana4,
+        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 5 THEN e.monto ELSE 0 END) AS semana5
+      FROM egreso e 
+        JOIN categoria_engreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        e.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(substr(e.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day')
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Ingresos por mes del anio actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerIngresosPorMesAnioActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '01' THEN i.monto ELSE 0 END) AS enero, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '02' THEN i.monto ELSE 0 END) AS febrero, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '03' THEN i.monto ELSE 0 END) AS marzo, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '04' THEN i.monto ELSE 0 END) AS abril, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '05' THEN i.monto ELSE 0 END) AS mayo, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '06' THEN i.monto ELSE 0 END) AS junio, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '07' THEN i.monto ELSE 0 END) AS julio, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '08' THEN i.monto ELSE 0 END) AS agosto, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '09' THEN i.monto ELSE 0 END) AS septiembre, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '10' THEN i.monto ELSE 0 END) AS octubre, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '11' THEN i.monto ELSE 0 END) AS noviembre, 
+        SUM(CASE WHEN strftime('%m', substr(i.fecha_registro, 1, 10)) = '12' THEN i.monto ELSE 0 END) AS diciembre 
+      FROM ingreso i 
+        JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
+        JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        i.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        strftime('%Y', substr(i.fecha_registro, 1, 10)) = strftime('%Y', 'now')
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Egresos por mes del anio actual de un presupuesto y un usuario
+  Future<Map<String, dynamic>> obtenerEgresosPorMesAnioActual(int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '01' THEN e.monto ELSE 0 END) AS enero, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '02' THEN e.monto ELSE 0 END) AS febrero, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '03' THEN e.monto ELSE 0 END) AS marzo, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '04' THEN e.monto ELSE 0 END) AS abril, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '05' THEN e.monto ELSE 0 END) AS mayo, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '06' THEN e.monto ELSE 0 END) AS junio, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '07' THEN e.monto ELSE 0 END) AS julio, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '08' THEN e.monto ELSE 0 END) AS agosto, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '09' THEN e.monto ELSE 0 END) AS septiembre, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '10' THEN e.monto ELSE 0 END) AS octubre, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '11' THEN e.monto ELSE 0 END) AS noviembre, 
+        SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '12' THEN e.monto ELSE 0 END) AS diciembre 
+      FROM egresos e 
+        JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
+      WHERE 
+        e.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        strftime('%Y', substr(e.fecha_registro, 1, 10)) = strftime('%Y', 'now')
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto]
+    );
+
+    return resultado.first;
+  }
+
+  // Suma de Ingresos por dia en el rango de dias seleccionado de un presupuesto y un usuario
+  Future<List<Map<String, dynamic>>> obtenerIngresosDentroDelRango(DateTime fechaInicio, DateTime fechaFinal, int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        substr(i.fecha_registro, 1, 10) AS fecha,
+        SUM(i.monto) AS monto
+      FROM ingreso i 
+        JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
+        JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto)
+      WHERE 
+        i.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(i.fecha_registro) >= date(?) AND date(i.fecha_registro) <= date(?)
+      GROUP BY substr(i.fecha_registro, 1, 10)
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto, fechaInicio.toIso8601String(), fechaFinal.toIso8601String()]
+    );
+
+    return resultado;
+  }
+
+  // Suma de Egresos por dia en el rango de dias seleccionado de un presupuesto y un usuario
+  Future<List<Map<String, dynamic>>> obtenerEgresosDentroDelRango(DateTime fechaInicio, DateTime fechaFinal, int idPresupuesto, int fkIdUsuario) async {
+    final db = await database;
+    String consulta = """
+      SELECT
+        substr(e.fecha_registro, 1, 10) AS fecha,
+        SUM(e.monto) AS monto
+      FROM egreso e 
+        JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto)
+      WHERE 
+        e.fk_id_usuario = ? AND 
+        p.id_presupuesto = ? AND 
+        date(e.fecha_registro) >= date(?) AND date(e.fecha_registro) <= date(?)
+      GROUP BY substr(e.fecha_registro, 1, 10)
+    """;
+
+    List<Map<String, dynamic>> resultado = await db.rawQuery(
+        consulta,
+        [fkIdUsuario, idPresupuesto, fechaInicio.toIso8601String(), fechaFinal.toIso8601String()]
+    );
+
+    return resultado;
+  }
+
 
 }
