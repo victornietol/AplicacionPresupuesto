@@ -105,7 +105,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
       // Construir widgets
       // Primero se agrega el row donde se colocan todos los elementos
       _widgetsGenerados.add(
-        const SizedBox(height: 10,),
+        const SizedBox(height: 15,),
       );
       _widgetsGenerados.add(
         Row(
@@ -207,7 +207,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(
-                bottom: 5,
+                bottom: 15,
               ),
               child: Text(
                 'Promedio p/día:',
@@ -218,7 +218,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
             ),
             Container(
               padding: EdgeInsets.only(
-                bottom: 5,
+                bottom: 15,
               ),
               child: Text(
                 formatearCantidad(promedio),
@@ -386,7 +386,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                   ),
                                   const SizedBox(height: 10),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 25),
+                                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                                     width: MediaQuery.of(context).size.width*0.75,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
@@ -479,37 +479,37 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                     top: 5,
                                                   ),
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['domingo']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['domingo']!=null ? _sumatoriaIngresosSemanaActual['domingo'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['lunes']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['lunes']!=null ? _sumatoriaIngresosSemanaActual['lunes'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['martes']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['martes']!=null ? _sumatoriaIngresosSemanaActual['martes'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['miercoles']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['miercoles']!=null ? _sumatoriaIngresosSemanaActual['miercoles'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['jueves']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['jueves']!=null ? _sumatoriaIngresosSemanaActual['jueves'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['viernes']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['viernes']!=null ? _sumatoriaIngresosSemanaActual['viernes'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
@@ -518,7 +518,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                     bottom: 5,
                                                   ),
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['sabado']),
+                                                    formatearCantidad(_sumatoriaIngresosSemanaActual['sabado']!=null ? _sumatoriaIngresosSemanaActual['sabado'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
@@ -601,7 +601,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                   ),
                                   const SizedBox(height: 10),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 25),
+                                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                                     width: MediaQuery.of(context).size.width*0.75,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
@@ -682,25 +682,25 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                     top: 5,
                                                   ),
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana1']),
+                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana1']!=null ? _sumatoriaIngresosMesActual['semana1'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana2']),
+                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana2']!=null ? _sumatoriaIngresosMesActual['semana2'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana3']),
+                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana3']!=null ? _sumatoriaIngresosMesActual['semana3'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana4']),
+                                                    formatearCantidad(_sumatoriaIngresosMesActual['semana4']!=null ? _sumatoriaIngresosMesActual['semana4'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
@@ -790,7 +790,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                   ),
                                   const SizedBox(height: 10),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 25),
+                                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                                     width: MediaQuery.of(context).size.width*0.75,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
@@ -907,67 +907,67 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                     top: 5,
                                                   ),
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['enero']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['enero']!=null ? _sumatoriaIngresosAnioActual['enero'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['febrero']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['febrero']!=null ? _sumatoriaIngresosAnioActual['febrero'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['marzo']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['marzo']!=null ? _sumatoriaIngresosAnioActual['marzo'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['abril']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['abril']!=null ? _sumatoriaIngresosAnioActual['abril'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['mayo']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['mayo']!=null ? _sumatoriaIngresosAnioActual['mayo'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['junio']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['junio']!=null ? _sumatoriaIngresosAnioActual['junio'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['julio']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['julio']!=null ? _sumatoriaIngresosAnioActual['junio'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['agosto']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['agosto']!=null ? _sumatoriaIngresosAnioActual['agosto'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['septiembre']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['septiembre']!=null ? _sumatoriaIngresosAnioActual['septiembre'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['octubre']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['octubre']!=null ? _sumatoriaIngresosAnioActual['octubre'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
                                                 Container(
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['noviembre']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['noviembre']!=null ? _sumatoriaIngresosAnioActual['noviembre'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),
@@ -976,7 +976,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                     bottom: 5,
                                                   ),
                                                   child: Text(
-                                                    formatearCantidad(_sumatoriaIngresosAnioActual['diciembre']),
+                                                    formatearCantidad(_sumatoriaIngresosAnioActual['diciembre']!=null ? _sumatoriaIngresosAnioActual['diciembre'] : 0.0),
                                                     textAlign: TextAlign.right,
                                                   ),
                                                 ),

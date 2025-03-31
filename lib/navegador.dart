@@ -1,4 +1,5 @@
 import 'package:calculadora_presupuesto/vistas/calendario.dart';
+import 'package:calculadora_presupuesto/vistas/resumenEgresos.dart';
 import 'package:calculadora_presupuesto/vistas/resumenIngresos.dart';
 import 'package:flutter/material.dart';
 import 'package:calculadora_presupuesto/vistas/home.dart';
@@ -255,6 +256,20 @@ class _NavegadorState extends State<Navegador>{
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ResumenIngresos(title: 'Resumen Ingresos', usuario: widget.usuario, presupuesto: presupuesto)),
+                                    );
+                                  });
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.trending_down_outlined),
+                                title: const Text('Resumen Egresos'),
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Future.delayed(const Duration(milliseconds: 150), () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ResumenEgresos(title: 'Resumen Egresos', usuario: widget.usuario, presupuesto: presupuesto)),
                                     );
                                   });
                                 },

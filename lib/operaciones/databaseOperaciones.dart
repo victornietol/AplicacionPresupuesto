@@ -904,7 +904,7 @@ class DataBaseOperaciones {
         SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '5' THEN e.monto ELSE 0 END) AS viernes, 
         SUM(CASE WHEN strftime('%w', substr(e.fecha_registro, 1, 10)) = '6' THEN e.monto ELSE 0 END) AS sabado 
       FROM egreso e
-        JOIN categoria_ingreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
         JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
       WHERE 
         e.fk_id_usuario = ? AND 
@@ -958,7 +958,7 @@ class DataBaseOperaciones {
         SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 4 THEN e.monto ELSE 0 END) AS semana4,
         SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 5 THEN e.monto ELSE 0 END) AS semana5
       FROM egreso e 
-        JOIN categoria_engreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
+        JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
         JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
       WHERE 
         e.fk_id_usuario = ? AND 
@@ -1025,7 +1025,7 @@ class DataBaseOperaciones {
         SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '10' THEN e.monto ELSE 0 END) AS octubre, 
         SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '11' THEN e.monto ELSE 0 END) AS noviembre, 
         SUM(CASE WHEN strftime('%m', substr(e.fecha_registro, 1, 10)) = '12' THEN e.monto ELSE 0 END) AS diciembre 
-      FROM egresos e 
+      FROM egreso e 
         JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
         JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
       WHERE 
