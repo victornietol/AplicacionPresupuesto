@@ -864,6 +864,7 @@ class DataBaseOperaciones {
   // Ingresos por dia de la semana actual de un presupuesto y un usuario
   Future<Map<String, dynamic>> obtenerIngresosPorDiaSemanaActual(int idPresupuesto, int fkIdUsuario) async {
     final db = await database;
+
     String consulta = """
       SELECT
         SUM(CASE WHEN strftime('%w', substr(i.fecha_registro, 1, 10)) = '0' THEN i.monto ELSE 0 END) AS domingo,
@@ -879,7 +880,7 @@ class DataBaseOperaciones {
       WHERE 
         i.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(i.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days'))
+        date(substr(i.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days', 'localtime'))
     """; // Se eligen las fechas dentro del rango de la semana actual, primero se identifica el domingo mas proximo y se le estan 6 dias para el inicio de la semana
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
@@ -908,7 +909,7 @@ class DataBaseOperaciones {
       WHERE 
         e.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(e.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days'))
+        date(substr(e.fecha_registro, 1, 10)) >= (SELECT date('now', 'weekday 0', '-6 days', 'localtime'))
     """; // Se eligen las fechas dentro del rango de la semana actual, primero se identifica el domingo mas proximo y se le estan 6 dias para el inicio de la semana
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
@@ -935,7 +936,7 @@ class DataBaseOperaciones {
       WHERE 
         i.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(i.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day')
+        date(substr(i.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day', 'localtime')
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
@@ -962,7 +963,7 @@ class DataBaseOperaciones {
       WHERE 
         e.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(e.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day')
+        date(substr(e.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day', 'localtime')
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
@@ -996,7 +997,7 @@ class DataBaseOperaciones {
       WHERE 
         i.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        strftime('%Y', substr(i.fecha_registro, 1, 10)) = strftime('%Y', 'now')
+        strftime('%Y', substr(i.fecha_registro, 1, 10)) = strftime('%Y', 'now', 'localtime')
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
@@ -1030,7 +1031,7 @@ class DataBaseOperaciones {
       WHERE 
         e.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        strftime('%Y', substr(e.fecha_registro, 1, 10)) = strftime('%Y', 'now')
+        strftime('%Y', substr(e.fecha_registro, 1, 10)) = strftime('%Y', 'now', 'localtime')
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
