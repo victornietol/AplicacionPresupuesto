@@ -2,6 +2,7 @@ import 'package:calculadora_presupuesto/operaciones/databaseOperaciones.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:decimal/decimal.dart';
 
 
 class ResumenIngresos extends StatefulWidget {
@@ -23,6 +24,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
   Map<String, dynamic> _sumatoriaIngresosMesActual = {};
   Map<String, dynamic> _sumatoriaIngresosAnioActual = {};
   List<Map<String, dynamic>> _sumatoriaIngresosRangoDias = [];
+  List<Widget> _widgetsGenerados = [];
 
   @override
   void initState() {
@@ -42,16 +44,6 @@ class ResumenIngresosState extends State<ResumenIngresos> {
 
   Future<void> _cargarSumatoriaIngresosSemanaActual() async {
     _sumatoriaIngresosSemanaActual = await DataBaseOperaciones().obtenerIngresosPorDiaSemanaActual(widget.presupuesto['id_presupuesto'], widget.presupuesto['fk_id_usuario']);
-    /*
-    await DataBaseOperaciones().insertarIngreso({
-      'nombre': 'ingreso semana anterior prueba',
-      'monto': 250.0,
-      'descripcion': 'ingreso prueba otra semana',
-      'fecha_registro': DateTime(2025,3, 17).toIso8601String(),
-      'fk_id_usuario': 1,
-      'fk_id_categoria_ingreso': 2
-    });
-     */
   }
 
   Future<void> _cargarSumatoriaIngresosMesActual() async {
@@ -62,21 +54,186 @@ class ResumenIngresosState extends State<ResumenIngresos> {
     _sumatoriaIngresosAnioActual = await DataBaseOperaciones().obtenerIngresosPorMesAnioActual(widget.presupuesto['id_presupuesto'], widget.presupuesto['fk_id_usuario']);
   }
 
-  Future<void> _cargarSumatoriaIngresosRangoDias(DateTime fechaInicio, DateTime fechaFinal) async {
-    List<Map<String, dynamic>> elementos = await DataBaseOperaciones().obtenerIngresosDentroDelRango(fechaInicio, fechaFinal, widget.presupuesto['id_presupuesto'], widget.presupuesto['fk_id_usuario']);
-    setState(() {
-      _sumatoriaIngresosRangoDias = elementos;
-    });
+  Future<List<Map<String, dynamic>>> _cargarSumatoriaIngresosRangoDias(DateTime fechaInicio, DateTime fechaFinal) async {
+    return await DataBaseOperaciones().obtenerIngresosDentroDelRango(fechaInicio, fechaFinal, widget.presupuesto['id_presupuesto'], widget.presupuesto['fk_id_usuario']);
   }
 
   double _obtenerSumaTotal(Map<String, dynamic> cantidades) {
-    double resultado = 0.0;
+    Decimal resultado = Decimal.zero;
     cantidades.forEach((key, value) {
       if(value!=null) {
-        resultado += value;
+        resultado += Decimal.parse(value.toString());
       }
     });
-    return resultado;
+    return resultado.toDouble();
+  }
+
+  Future<void> _generarWidgets(List<DateTime> fechas) async {
+    if(fechas.length==1) {
+      // Solo se selecciono una fecha, muestran solo de ese dia
+      _sumatoriaIngresosRangoDias = await _cargarSumatoriaIngresosRangoDias(fechas[0], fechas[0]);
+    } else if(fechas.length>1) {
+      // Se selecciono un rango
+      _sumatoriaIngresosRangoDias = await _cargarSumatoriaIngresosRangoDias(fechas[0], fechas[1]);
+    }
+
+    if(_sumatoriaIngresosRangoDias.isEmpty) {
+      _widgetsGenerados.clear();
+      _widgetsGenerados.add(
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          child: Text(
+              'No se encontraron registros en ese rango.',
+            textAlign: TextAlign.center,
+          ),
+        )
+      );
+      setState(() {}); // Actualizar estado del widget
+
+    } else {
+      // Obtener suamtoria total de los elementos y promedio
+      Decimal sumatoriaTotal = Decimal.zero;
+      for(var ingreso in _sumatoriaIngresosRangoDias) {
+        if(ingreso['monto']!=null) {
+          sumatoriaTotal += Decimal.parse(ingreso['monto'].toString());
+        }
+      }
+
+      double promedio = sumatoriaTotal.toDouble()/_sumatoriaIngresosRangoDias.length;
+
+      _widgetsGenerados.clear();
+      // Construir widgets
+      // Primero se agrega el row donde se colocan todos los elementos
+      _widgetsGenerados.add(
+        const SizedBox(height: 10,),
+      );
+      _widgetsGenerados.add(
+        Row(
+          children: [
+            // Dias
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Se agregan segun el numero de elementos en los elementos obtenidos
+                for(var ingreso in _sumatoriaIngresosRangoDias)
+                  Container(
+                    child: Text(
+                      ingreso['fecha'],
+                    ),
+                  ),
+              ],
+            ),
+
+            // Lineas puntos
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  for (int i = 0; i < _sumatoriaIngresosRangoDias.length; i++)
+                    SizedBox(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          int conteoPuntos = (constraints.maxWidth / 7).floor();
+                          String puntos = '.' * conteoPuntos;
+                          return Text(
+                            puntos,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(letterSpacing: 2),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Monto de cada elemento
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for(var ingreso in _sumatoriaIngresosRangoDias)
+                  Container(
+                    child: Text(
+                      formatearCantidad(ingreso['monto']),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+              ],
+            )
+          ],
+        ),
+      );
+
+      // Separador
+      _widgetsGenerados.add(
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 6),
+          height: 1,
+          color: Colors.grey.withOpacity(0.3),
+        ),
+      );
+
+      // Total de todos los elementos
+      _widgetsGenerados.add(
+        // Total de la semana
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Container(
+              child: Text(
+                'Total:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Container(
+              child: Text(
+                formatearCantidad(sumatoriaTotal.toDouble()),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      // Promedio por dia
+      _widgetsGenerados.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(
+                bottom: 5,
+              ),
+              child: Text(
+                'Promedio p/día:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(
+                bottom: 5,
+              ),
+              child: Text(
+                formatearCantidad(promedio),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      );
+      setState(() {}); // Actualizar estado
+    }
+
   }
 
   // Formatear cantidad de dinero
@@ -115,6 +272,16 @@ class ResumenIngresosState extends State<ResumenIngresos> {
 
           } else {
             // Los datos se cargaron
+            // Obtener promedios
+            double sumaTotalDiasSemanaActual = _obtenerSumaTotal(_sumatoriaIngresosSemanaActual);
+            double sumaTotalMesActual = _obtenerSumaTotal(_sumatoriaIngresosMesActual);
+            double sumaTotalAnioActual = _obtenerSumaTotal(_sumatoriaIngresosAnioActual);
+
+            double promedioSemanaActual = sumaTotalDiasSemanaActual/7;
+            double meses = _sumatoriaIngresosMesActual['semana5']!=null ? 5.0 : 4.0;
+            double promedioMesActual = sumaTotalMesActual/meses;
+            double promedioAnioActual = sumaTotalAnioActual/12;
+
             return Scaffold(
                 appBar: AppBar(
                   title: Text(
@@ -141,6 +308,74 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                               child: Column(
                                 children: [
                                   // Primer apartado
+                                  const SizedBox(height: 30),
+                                  Text(
+                                    'Total de ingresos por dia dentro de un rango',
+                                    style: TextStyle(
+                                      //fontSize: 15,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  MaterialButton(
+                                      onPressed: () {
+                                        List<DateTime> _dates = [];
+                                        showCalendarDatePicker2Dialog(
+                                          context: context,
+                                          config: CalendarDatePicker2WithActionButtonsConfig(
+                                            calendarType: CalendarDatePicker2Type.range,
+                                          ),
+                                          dialogSize: const Size(325, 400),
+                                          value: _dates,
+                                          borderRadius: BorderRadius.circular(15),
+                                        ).then((value) {
+                                          if(value!=null) {
+                                            List<DateTime> valueSinNull = value.cast<DateTime>(); // Eliminar nulos
+                                            _generarWidgets(valueSinNull);
+                                          }
+                                        } );
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                                          color: const Color(0xFF02013C),
+                                        ),
+                                        child: Text(
+                                          'Seleccionar rango',
+                                          style: TextStyle(
+                                              color: Colors.white
+                                          ),
+                                        ),
+                                      )
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 25),
+                                    width: MediaQuery.of(context).size.width*0.75,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                        color: Colors.grey.withOpacity(0.1)
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        if(_widgetsGenerados.isEmpty)
+                                          Container(
+                                            padding: EdgeInsets.symmetric(vertical: 20),
+                                            child: Text('Selecciona un rango de fechas para mostrar ingresos.'),
+                                          )
+                                        else
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: _widgetsGenerados,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Segundo apartado
                                   const SizedBox(height: 20),
                                   Text(
                                     'Total de ingresos por día de la semana actual',
@@ -302,11 +537,34 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             Container(
+                                              child: Text(
+                                                'Total:',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              child: Text(
+                                                formatearCantidad(sumaTotalDiasSemanaActual),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        // Promedio
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Container(
                                               padding: EdgeInsets.only(
                                                 bottom: 5,
                                               ),
                                               child: Text(
-                                                'Total:',
+                                                'Promedio p/día:',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -317,7 +575,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                 bottom: 5,
                                               ),
                                               child: Text(
-                                                formatearCantidad(_obtenerSumaTotal(_sumatoriaIngresosSemanaActual)),
+                                                formatearCantidad(promedioSemanaActual),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -332,7 +590,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                     ),
                                   ),
 
-                                  // Segundo apartado
+                                  // Tercer apartado
                                   const SizedBox(height: 30),
                                   Text(
                                     'Total de ingresos por semana del mes actual',
@@ -468,9 +726,6 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             Container(
-                                              padding: EdgeInsets.only(
-                                                bottom: 5,
-                                              ),
                                               child: Text(
                                                 'Total:',
                                                 style: TextStyle(
@@ -479,9 +734,6 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                               ),
                                             ),
                                             Container(
-                                              padding: EdgeInsets.only(
-                                                bottom: 5,
-                                              ),
                                               child: Text(
                                                 formatearCantidad(_obtenerSumaTotal(_sumatoriaIngresosMesActual)),
                                                 style: TextStyle(
@@ -492,13 +744,42 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                             ),
                                           ],
                                         ),
+                                        // Promedio
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                bottom: 5,
+                                              ),
+                                              child: Text(
+                                                'Promedio p/semana:',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                bottom: 5,
+                                              ),
+                                              child: Text(
+                                                formatearCantidad(promedioMesActual),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                          ],
+                                        )
 
 
                                       ],
                                     ),
                                   ),
 
-                                  // Tercer apartado
+                                  // Cuarto apartado
                                   const SizedBox(height: 30),
                                   Text(
                                     'Total de ingresos por mes del año actual',
@@ -714,11 +995,34 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             Container(
+                                              child: Text(
+                                                'Total:',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              child: Text(
+                                                formatearCantidad(_obtenerSumaTotal(_sumatoriaIngresosAnioActual)),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        // Promedio
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Container(
                                               padding: EdgeInsets.only(
                                                 bottom: 5,
                                               ),
                                               child: Text(
-                                                'Total:',
+                                                'Promedio p/mes:',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -729,7 +1033,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                                 bottom: 5,
                                               ),
                                               child: Text(
-                                                formatearCantidad(_obtenerSumaTotal(_sumatoriaIngresosAnioActual)),
+                                                formatearCantidad(promedioAnioActual),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -743,48 +1047,7 @@ class ResumenIngresosState extends State<ResumenIngresos> {
                                       ],
                                     ),
                                   ),
-
-                                  // Cuarto apartado
                                   const SizedBox(height: 30),
-                                  Text(
-                                    'Total de ingresos por dia dentro de un rango',
-                                    style: TextStyle(
-                                      //fontSize: 15,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  MaterialButton(
-                                    onPressed: () {
-                                      List<DateTime> _dates = [];
-                                      showCalendarDatePicker2Dialog(
-                                        context: context,
-                                        config: CalendarDatePicker2WithActionButtonsConfig(
-                                          calendarType: CalendarDatePicker2Type.range,
-                                        ),
-                                        dialogSize: const Size(325, 400),
-                                        value: _dates,
-                                        borderRadius: BorderRadius.circular(15),
-                                      ).then((value) {
-                                        var results = value;
-                                        print(results);
-                                      } );
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                                        color: const Color(0xFF02013C),
-                                      ),
-                                      child: Text(
-                                        'Seleccionar rango',
-                                        style: TextStyle(
-                                          color: Colors.white
-                                        ),
-                                      ),
-                                    )
-                                  ),
-
 
                                 ],
                               ),
