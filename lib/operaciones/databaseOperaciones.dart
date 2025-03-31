@@ -404,7 +404,7 @@ class DataBaseOperaciones {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario == null) {
+    if(datosUsuario.isEmpty) {
       // Si el usuario no existe
       return [];
     }
@@ -571,7 +571,7 @@ class DataBaseOperaciones {
     final db = await database;
     final datosUsuario = await obtenerUsuario(usuario);
 
-    if(datosUsuario==null) {
+    if(datosUsuario.isEmpty) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
@@ -649,7 +649,7 @@ class DataBaseOperaciones {
     final datosUsuario = await obtenerUsuario(usuario);
     final idCat = await obtenerIdCategoria('egreso', categoria, idPresupuesto);
 
-    if(datosUsuario==null || idCat==null) {
+    if(datosUsuario.isEmpty || idCat==null) {
       return Decimal.parse('0.0'); // El usuario no existe
     } else {
       try {
@@ -923,27 +923,27 @@ class DataBaseOperaciones {
   // Ingresos por semana del mes actual de un presupuesto y un usuario
   Future<Map<String, dynamic>> obtenerIngresosPorSemanaMesActual(int idPresupuesto, int fkIdUsuario) async {
     final db = await database;
+
     String consulta = """
       SELECT
-        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 1 THEN i.monto ELSE 0 END) AS semana1,
-        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 2 THEN i.monto ELSE 0 END) AS semana2,
-        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 3 THEN i.monto ELSE 0 END) AS semana3,
-        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 4 THEN i.monto ELSE 0 END) AS semana4,
-        SUM(CASE WHEN ((strftime('%d', substr(i.fecha_registro, 1, 10)) -1) /7)+1 = 5 THEN i.monto ELSE 0 END) AS semana5
+        SUM(CASE WHEN strftime('%d', i.fecha_registro) BETWEEN '01' AND '07' THEN i.monto ELSE 0 END) AS sem_1_7,
+        SUM(CASE WHEN strftime('%d', i.fecha_registro) BETWEEN '08' AND '14' THEN i.monto ELSE 0 END) AS sem_8_14,
+        SUM(CASE WHEN strftime('%d', i.fecha_registro) BETWEEN '15' AND '21' THEN i.monto ELSE 0 END) AS sem_15_21,
+        SUM(CASE WHEN strftime('%d', i.fecha_registro) BETWEEN '22' AND '28' THEN i.monto ELSE 0 END) AS sem_22_28,
+        SUM(CASE WHEN strftime('%d', i.fecha_registro) BETWEEN '29' AND '31' THEN i.monto ELSE 0 END) AS sem_29_31
       FROM ingreso i 
         JOIN categoria_ingreso ci ON (i.fk_id_categoria_ingreso = ci.id_categoria) 
         JOIN presupuesto p ON (ci.fk_id_presupuesto = p.id_presupuesto) 
       WHERE 
         i.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(i.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day', 'localtime')
+        date(substr(i.fecha_registro, 1, 10)) BETWEEN (date('now', 'start of month')) AND (date('now', 'start of month', '+1 month', 'localtime'))
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(
         consulta,
         [fkIdUsuario, idPresupuesto]
     );
-
     return resultado.first;
   }
 
@@ -952,18 +952,18 @@ class DataBaseOperaciones {
     final db = await database;
     String consulta = """
       SELECT
-        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 1 THEN e.monto ELSE 0 END) AS semana1,
-        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 2 THEN e.monto ELSE 0 END) AS semana2,
-        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 3 THEN e.monto ELSE 0 END) AS semana3,
-        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 4 THEN e.monto ELSE 0 END) AS semana4,
-        SUM(CASE WHEN ((strftime('%d', substr(e.fecha_registro, 1, 10)) -1) /7)+1 = 5 THEN e.monto ELSE 0 END) AS semana5
+        SUM(CASE WHEN strftime('%d', e.fecha_registro) BETWEEN '01' AND '07' THEN e.monto ELSE 0 END) AS sem_1_7,
+        SUM(CASE WHEN strftime('%d', e.fecha_registro) BETWEEN '08' AND '14' THEN e.monto ELSE 0 END) AS sem_8_14,
+        SUM(CASE WHEN strftime('%d', e.fecha_registro) BETWEEN '15' AND '21' THEN e.monto ELSE 0 END) AS sem_15_21,
+        SUM(CASE WHEN strftime('%d', e.fecha_registro) BETWEEN '22' AND '28' THEN e.monto ELSE 0 END) AS sem_22_28,
+        SUM(CASE WHEN strftime('%d', e.fecha_registro) BETWEEN '29' AND '31' THEN e.monto ELSE 0 END) AS sem_29_31
       FROM egreso e 
         JOIN categoria_egreso ce ON (e.fk_id_categoria_egreso = ce.id_categoria) 
         JOIN presupuesto p ON (ce.fk_id_presupuesto = p.id_presupuesto) 
       WHERE 
         e.fk_id_usuario = ? AND 
         p.id_presupuesto = ? AND 
-        date(substr(e.fecha_registro, 1, 10)) BETWEEN (SELECT date('now', 'start of month')) AND date('now', 'start of month', '+1 month', '-1 day', 'localtime')
+        date(substr(e.fecha_registro, 1, 10)) BETWEEN (date('now', 'start of month')) AND (date('now', 'start of month', '+1 month', 'localtime'))
     """;
 
     List<Map<String, dynamic>> resultado = await db.rawQuery(

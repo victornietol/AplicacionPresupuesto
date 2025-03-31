@@ -313,7 +313,7 @@ class _NavegadorState extends State<Navegador>{
                             ],
                           ),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height*0.5,
+                              height: MediaQuery.of(context).size.height*0.38,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.end,

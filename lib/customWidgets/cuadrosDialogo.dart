@@ -2217,7 +2217,8 @@ class _CuadroDialogoInformacionAppState extends State<CuadroDialogoInformacionAp
                             '  • fl_chart\n'
                             '  • syncfusion_flutter_charts\n'
                             '  • shared_preferences\n'
-                            '  • table_calendar'
+                            '  • table_calendar\n'
+                            '  • calendar_date_picker2'
                     ),
                   ],
                 ),
@@ -2241,7 +2242,7 @@ class _CuadroDialogoInformacionAppState extends State<CuadroDialogoInformacionAp
                         color: const Color(0xFF02013C).withOpacity(0.8),
                       ),
                     ),
-                    const Text('victornieto315@gmai.com'),
+                    const Text('victornieto315@gmail.com'),
                   ],
                 ),
               ),

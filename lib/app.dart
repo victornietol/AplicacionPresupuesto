@@ -1,5 +1,6 @@
 import 'package:calculadora_presupuesto/navegador.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -15,6 +16,15 @@ class MyApp extends StatelessWidget {
       ),
       locale: const Locale('es', 'MX'),
       home: const Navegador(inicio: 1, usuario: 'generico'),
+
+      // Para el idioma de calendar_date_picker2
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [
+        Locale('es', 'ES'),
+      ],
+
+      // Desactivar banner debug
+      debugShowCheckedModeBanner: false,
     );
   }
 }

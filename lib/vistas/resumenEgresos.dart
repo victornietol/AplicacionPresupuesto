@@ -408,11 +408,6 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                   top: 5,
                                                 ),
                                                 child: Text(
-                                                  'Domingo:',
-                                                ),
-                                              ),
-                                              Container(
-                                                child: Text(
                                                   'Lunes:',
                                                 ),
                                               ),
@@ -437,11 +432,16 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                 ),
                                               ),
                                               Container(
+                                                child: Text(
+                                                    'Sábado:'
+                                                ),
+                                              ),
+                                              Container(
                                                 padding: EdgeInsets.only(
                                                   bottom: 5,
                                                 ),
                                                 child: Text(
-                                                    'Sábado:'
+                                                  'Domingo:',
                                                 ),
                                               ),
                                             ],
@@ -479,12 +479,6 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                   top: 5,
                                                 ),
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosSemanaActual['domingo']!=null ? _sumatoriaEgresosSemanaActual['domingo'] : 0.0),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                              ),
-                                              Container(
-                                                child: Text(
                                                   formatearCantidad(_sumatoriaEgresosSemanaActual['lunes']!=null ? _sumatoriaEgresosSemanaActual['lunes'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
@@ -514,11 +508,17 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                 ),
                                               ),
                                               Container(
+                                                child: Text(
+                                                  formatearCantidad(_sumatoriaEgresosSemanaActual['sabado']!=null ? _sumatoriaEgresosSemanaActual['sabado'] : 0.0),
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                              ),
+                                              Container(
                                                 padding: EdgeInsets.only(
                                                   bottom: 5,
                                                 ),
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosSemanaActual['sabado']!=null ? _sumatoriaEgresosSemanaActual['sabado'] : 0.0),
+                                                  formatearCantidad(_sumatoriaEgresosSemanaActual['domingo']!=null ? _sumatoriaEgresosSemanaActual['domingo'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
                                               ),
@@ -623,30 +623,29 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                   top: 5,
                                                 ),
                                                 child: Text(
-                                                  'Semana 1:',
+                                                  'Sem 1-7:',
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                    'Semana 2:'
+                                                    'Sem 8-14:'
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                    'Semana 3:'
+                                                    'Sem 15-21:'
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                    'Semana 4:'
+                                                    'Sem 22-28:'
                                                 ),
                                               ),
-                                              if(_sumatoriaEgresosMesActual['semana5']!=null)
-                                                Container(
-                                                  child: Text(
-                                                      'Semana 5:'
-                                                  ),
+                                              Container(
+                                                child: Text(
+                                                    'Sem 29-31:'
                                                 ),
+                                              ),
                                             ],
                                           ),
 
@@ -682,35 +681,34 @@ class ResumenEgresosState extends State<ResumenEgresos> {
                                                   top: 5,
                                                 ),
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosMesActual['semana1']!=null ? _sumatoriaEgresosMesActual['semana1'] : 0.0),
+                                                  formatearCantidad(_sumatoriaEgresosMesActual['sem_1_7']!=null ? _sumatoriaEgresosMesActual['sem_1_7'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosMesActual['semana2']!=null ? _sumatoriaEgresosMesActual['semana2'] : 0.0),
+                                                  formatearCantidad(_sumatoriaEgresosMesActual['sem_8_14']!=null ? _sumatoriaEgresosMesActual['sem_8_14'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosMesActual['semana3']!=null ? _sumatoriaEgresosMesActual['semana3'] : 0.0),
+                                                  formatearCantidad(_sumatoriaEgresosMesActual['sem_15_21']!=null ? _sumatoriaEgresosMesActual['sem_15_21'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
                                               ),
                                               Container(
                                                 child: Text(
-                                                  formatearCantidad(_sumatoriaEgresosMesActual['semana4']!=null ? _sumatoriaEgresosMesActual['semana4'] : 0.0),
+                                                  formatearCantidad(_sumatoriaEgresosMesActual['sem_22_28']!=null ? _sumatoriaEgresosMesActual['sem_22_28'] : 0.0),
                                                   textAlign: TextAlign.right,
                                                 ),
                                               ),
-                                              if(_sumatoriaEgresosMesActual['semana5']!=null)
-                                                Container(
-                                                  child: Text(
-                                                    formatearCantidad(_sumatoriaEgresosMesActual['semana5']),
-                                                    textAlign: TextAlign.right,
-                                                  ),
+                                              Container(
+                                                child: Text(
+                                                  formatearCantidad(_sumatoriaEgresosMesActual['sem_29_31']!=null ? _sumatoriaEgresosMesActual['sem_29_31'] : 0.0),
+                                                  textAlign: TextAlign.right,
                                                 ),
+                                              ),
                                             ],
                                           )
                                         ],
